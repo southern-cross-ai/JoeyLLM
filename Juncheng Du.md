@@ -4,6 +4,6 @@ Hello everyone! 😃 My name is Juncheng Du. I know a bit of PyTorch 🔥, a bit
 I’m curious about new technologies and love learning and experimenting. Looking forward to growing together with like-minded people!
 
 🛠 Tech Stack
-PyTorch 🔥
-Python 🐍
-Machine Learning 🤖
+a little bit PyTorch 🔥
+a little bit Python 🐍
+a little bit Machine Learning 🤖
