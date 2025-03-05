@@ -46,8 +46,9 @@ We're a bunch of **legendary AI enthusiasts** working together to bring **JoeyLL
 👤 [Michael Mi](Michael%20Mi.md)  
 👤 [Sharon](Sharon.md)  
 👤 [Pranav](pranav.md)  
-👤 [Unesh Neupane](unesh.md)
-👤 [Shuang Liu](ShuangLiu.md)
+👤 [Unesh Neupane](unesh.md)  
+👤 [Shuang Liu](ShuangLiu.md)  
+
 
 ---
 
