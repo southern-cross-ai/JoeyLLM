@@ -32,7 +32,7 @@ Tools: Confluence, Trello, GitHub, Mindjet Mind Manager, Visio
 ## Contact Information
 - **Email:** sharonh666888@gmail.com
 - **LinkedIn:** www.linkedin.com/in/sharon-huang-4176b127b
-- **GitHub:** [[GitHub Profile URL] *(if applicable)*](https://github.com/Valentina-H0)
+- **GitHub:** https://github.com/Valentina-H0
 
 ## Additional Information
 - MBTI: ENTJ-A
