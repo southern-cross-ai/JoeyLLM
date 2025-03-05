@@ -13,7 +13,7 @@ To ensure a consistent working environment where all programs are properly confi
 	•	Define the next phase’s objectives and priorities
 
 ## 2. Build Project Documentation & Track Work Progress
-	•	Update and organize project documentation, including:
+	Update and organize project documentation, including:
 	•	Requirement analysis and technical plan
 	•	Data processing and model training workflow
 	•	Completed tasks and ongoing work tracking
