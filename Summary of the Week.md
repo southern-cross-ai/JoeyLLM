@@ -93,12 +93,13 @@ docker rename my_container my_old_container
 
 | Role | Name |
 |------|------|
-| **Data Collection Specialist** |  |
-| **Data Cleaning & Processing Engineer** |  |
-| **Model Development Engineer** |  |
-| **Web Development Engineer** |  |
-| **Multimedia & Content Specialist** | Shuang Liu | |
-| **Public Relations & Communication** | Shuang Liu | |
+| **Data Collection Specialist** | Jucheng Du, Haoqing Liu, Guangxin Mi, Pranav Unkule|
+| **Data Cleaning & Processing Engineer** | Jucheng Du, Chenyu Gao, Guangxin Mi, Pranav Unkule|
+| **Model Development Engineer** | Jucheng Du, Chenyu Gao, Haoqing Liu, Guangxin Mi, Ashley Zhu, Pranav Unkule|
+| **Web Development Engineer** | Ashley Zhu, Shuang Liu |
+| **Multimedia & Content Specialist** | Shuang Liu, Ashley Zhu |
+| **Public Relations & Communication** | Shuang Liu |
+| **Deputy and Spokesperson** | Shuang Liu, Haoqing Liu |
 
 # Project Plan for Next Week
 
