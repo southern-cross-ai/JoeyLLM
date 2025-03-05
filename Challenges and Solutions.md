@@ -4,8 +4,7 @@
 
 | **Challenge**                                    | **Solution**                                          |
 |--------------------------------------------------|------------------------------------------------------|
-| **Challenge 1**: Issue with API response delay   | Optimized API calls and added caching mechanism      |
-| **Challenge 2**: Difficulty in deploying app to cloud | Used a CI/CD pipeline for smooth deployment          |
-| **Challenge 3**: Cross-browser compatibility     | Used CSS prefixes and tested across browsers         |
-| **Challenge 4**: Handling large data sets       | Implemented pagination and lazy loading              |
-| **Challenge 5**: Slow application load time     | Compressed images and minified CSS/JS files          |
+| **Challenge 1**: Difficulty in setting up Docker Environment among some MAC users.   |  Expert team members assisted them in setting up the environemnt.    |
+| **Challenge 2**: Trouble understanding the difference between Containers and VM's | Matthew demonstrated the differences and advantages of Containers over VM's         |
+| **Challenge 3**: Team structure undefined.     | Assigned roles like spokesperson, deputy, etc. to each team members.         |
+| **Challenge 4**: Communication gap.       | Matthew created a discord for one-stop communication.              |
