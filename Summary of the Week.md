@@ -89,6 +89,15 @@ docker run -dit --name my_container2 ubuntu:22.04 /bin/bash
 docker rename my_container my_old_container
 ```
 
+# Project Role Sign-Up Sheet
+
+| Role | Name |
+|------|------|
+| **Data Collection Specialist** |  |
+| **Data Cleaning & Processing Engineer** |  |
+| **Model Development Engineer** |  |
+| **Multimedia & Content Specialist** |  |
+| **Public Relations & Communication** |  |
 
 # Project Plan for Next Week
 
@@ -114,8 +123,8 @@ docker rename my_container my_old_container
 
 | **Challenge**                                    | **Solution**                                          |
 |--------------------------------------------------|------------------------------------------------------|
-| **Challenge 1**: Difficulty in setting up Docker Environment among some MAC users.   |  Expert team members assisted them in setting up the environemnt.    |
+| **Challenge 1**: Difficulty in setting up Docker Environment among some MAC users.   |  Expert team members assisted them in setting up the environment.    |
 | **Challenge 2**: Trouble understanding the difference between Containers and VM's | Matthew demonstrated the differences and advantages of Containers over VM's         |
-| **Challenge 3**: Team structure undefined.     | Assigned roles like spokesperson, deputy, etc. to each team members.         |
-| **Challenge 4**: Communication gap.       | Matthew created a discord for one-stop communication.              |
+| **Challenge 3**: Team structure undefined.     | Assigned roles like spokesperson, deputy, etc. to each team member.         |
+| **Challenge 4**: Communication gap.       | Matthew created a Discord for one-stop communication.              |
 
