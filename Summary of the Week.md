@@ -110,7 +110,7 @@ docker rename my_container my_old_container
 	•	Preprocess and clean the collected data to ensure quality
 	•	Organize the dataset for integration into the training pipeline
 
-## Challenges and Solutions
+## 🎯Challenges and Solutions
 
 | **Challenge**                                    | **Solution**                                          |
 |--------------------------------------------------|------------------------------------------------------|
