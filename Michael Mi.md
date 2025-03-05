@@ -15,5 +15,12 @@ I am a Master of Computing Student and major in Machine Learning area. At meanti
 - **Cloud Platforms**: AWS, Google Cloud, Azure
 - **Version Control**: Git, GitHub, GitLab
 
+### 🎯 Hobbies & Interests
+- **AI Research**: Exploring the latest advancements in deep learning and AI, particularly in generative models and reinforcement learning.
+- **Open Source Contributions**: Actively contributing to open-source projects related to machine learning and data science.
+- **Reading**: Enjoy reading books on technology, philosophy, and science fiction.
+- **Gaming**: Passionate about strategy games and AI-driven game development.
+- **Outdoor Activities**: Hiking, cycling, and photography to balance work and life.
+
 ### 📫 My link!  
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=flat&logo=github)](https://github.com/miguagnxin)
