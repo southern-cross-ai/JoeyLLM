@@ -24,3 +24,5 @@ I am a Master of Computing Student and major in Machine Learning area. At meanti
 
 ### 📫 My link!  
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=flat&logo=github)](https://github.com/miguagnxin)
+
+![Neural Network](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExeWlrcW82NTlrdmJ3N3djcGRqeGQ5NXhldnJvdnl1bTlzeWV4dWNjNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0lGd2OXXHe4tFhb7Wh/giphy.gif)
