@@ -6,8 +6,8 @@ To ensure a consistent working environment where all programs are properly confi
 # Project Plan for Next Week
 
 ## 1. Client Meeting to Discuss Progress
-	•	Time: To be confirmed (recommend scheduling early)
-	•	Objectives:
+	Time: 2pm Wednesday, 12 March
+	Objectives:
 	•	Report this week’s progress, including data collection, model training preparation, and technical implementation
 	•	Discuss current challenges and seek client feedback
 	•	Define the next phase’s objectives and priorities
