@@ -33,22 +33,6 @@ We focus on:
 - **Fine-tuning for ethical AI** (we won’t teach it to call everything a "drop bear")  
 - **Making it smart enough to handle real Australian language and culture**  
 
----
-
-## 🤝 Meet the Team  
-
-We're a bunch of **legendary AI enthusiasts** working together to bring **JoeyLLM to life**. Check out our profiles:  
-
-👤 [Ar7hur](Ar7hur.md)  
-👤 [Ashley Zhu](AshleyZhu.md)  
-👤 [Chenyu Gao](Chenyu%20Gao.md)  
-👤 [Juncheng Du](Juncheng%20Du.md)  
-👤 [Michael Mi](Michael%20Mi.md)  
-👤 [Sharon](Sharon.md)  
-👤 [Pranav](pranav.md)  
-👤 [Unesh Neupane](unesh.md)  
-👤 [Shuang Liu](ShuangLiu.md)  
-
 
 ---
 
