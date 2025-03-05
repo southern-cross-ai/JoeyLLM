@@ -1,5 +1,5 @@
 # ✨ Self Introduction
-
+![Cute Cat GIF](https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif)
 ## 🙋 Personal Information
 - **Name:** Sharon  
 - **Location:** Canberra  
