@@ -1,5 +1,4 @@
 # ✨ Self Introduction
-![Cute Cat GIF](https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif)
 ## 🙋 Personal Information
 - **Name:** Sharon  
 - **Location:** Canberra  
@@ -40,4 +39,5 @@
 - **GitHub:** [View my repositories](#)  
 
 ## 💡 Additional Information
-- **MBTI:** ENTJ-A  
+- **MBTI:** ENTJ-A
+- ![Cute Cat GIF](https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif)
