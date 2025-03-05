@@ -97,8 +97,8 @@ docker rename my_container my_old_container
 | **Data Cleaning & Processing Engineer** |  |
 | **Model Development Engineer** |  |
 | **Web Development Engineer** |  |
-| **Multimedia & Content Specialist** |  |
-| **Public Relations & Communication** |  |
+| **Multimedia & Content Specialist** | Shuang Liu | |
+| **Public Relations & Communication** | Shuang Liu | |
 
 # Project Plan for Next Week
 
