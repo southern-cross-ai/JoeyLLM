@@ -40,4 +40,4 @@
 
 ## 💡 Additional Information
 - **MBTI:** ENTJ-A
-- ![Cute Cat GIF](https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif)
+- ![LLM-related GIF](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExamtuNjUzaGNwNmk2YTFoamhmc3BwbnhmOXIweGU3MnhldnU3dXR2dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/coxQHKASG60HrHtvkt/giphy.gif)
