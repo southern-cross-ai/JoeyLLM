@@ -19,5 +19,11 @@ When I'm not coding, you'll find me playing table-tennis or videogames, or dooms
 
 ## 🔥 Current Project : JoeyLLM.
 
-<div class="tenor-gif-embed" data-postid="12781076407588216484" data-share-method="host" data-aspect-ratio="0.961847" data-width="100%"><a href="https://tenor.com/view/horse-sus-looking-at-you-meme-gif-12781076407588216484">Horse Sus GIF</a>from <a href="https://tenor.com/search/horse-gifs">Horse GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+Challenge	Solution
+Challenge 1: Issue with API response delay	Optimized API calls and added caching mechanism
+Challenge 2: Difficulty in deploying app to cloud	Used a CI/CD pipeline for smooth deployment
+Challenge 3: Cross-browser compatibility	Used CSS prefixes and tested across browsers
+Challenge 4: Handling large data sets	Implemented pagination and lazy loading
+Challenge 5: Slow application load time	Compressed images and minified CSS/JS files
+
 
