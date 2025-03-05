@@ -19,5 +19,5 @@ When I'm not coding, you'll find me playing table-tennis or videogames, or dooms
 
 ## 🔥 Current Project : JoeyLLM.
 
-![horse](https://tenor.com/view/horse-sus-looking-at-you-meme-gif-12781076407588216484)
+![Cool GIF](https://tenor.com/view/horse-sus-looking-at-you-meme-gif-12781076407588216484)
 
