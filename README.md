@@ -35,6 +35,21 @@ We focus on:
 
 ---
 
+## 🤝 Meet the Team  
+
+We're a bunch of **legendary AI enthusiasts** working together to bring **JoeyLLM to life**. Check out our profiles:  
+
+👤 [Ar7hur](Ar7hur.md)  
+👤 [Ashley Zhu](AshleyZhu.md)  
+👤 [Chenyu Gao](Chenyu%20Gao.md)  
+👤 [Juncheng Du](Juncheng%20Du.md)  
+👤 [Michael Mi](Michael%20Mi.md)  
+👤 [Sharon](Sharon.md)  
+👤 [Pranav](pranav.md)  
+👤 [Unesh Neupane](unesh.md)
+
+---
+
 ## 🤝 Get Involved  
 Reckon you’ve got what it takes to **help train an AI that knows the difference between "mate" and "maaate"?** Join us!  
 
@@ -47,4 +62,4 @@ Reckon you’ve got what it takes to **help train an AI that knows the differenc
 ## 📜 License  
 JoeyLLM is **open-source**, so feel free to **fork it, tweak it, and teach it more Aussie slang**.  
 
-🚀 *Let’s build the AI that even a kangaroo would be proud of!* 🇦🇺🐨  
+🚀 *Let’s build the AI that even a kangaroo would be proud of!* 🇦🇺🐨 
