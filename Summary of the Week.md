@@ -109,3 +109,13 @@ docker rename my_container my_old_container
 	•	Identify and gather relevant textual data
 	•	Preprocess and clean the collected data to ensure quality
 	•	Organize the dataset for integration into the training pipeline
+
+## Challenges and Solutions
+
+| **Challenge**                                    | **Solution**                                          |
+|--------------------------------------------------|------------------------------------------------------|
+| **Challenge 1**: Difficulty in setting up Docker Environment among some MAC users.   |  Expert team members assisted them in setting up the environemnt.    |
+| **Challenge 2**: Trouble understanding the difference between Containers and VM's | Matthew demonstrated the differences and advantages of Containers over VM's         |
+| **Challenge 3**: Team structure undefined.     | Assigned roles like spokesperson, deputy, etc. to each team members.         |
+| **Challenge 4**: Communication gap.       | Matthew created a discord for one-stop communication.              |
+
