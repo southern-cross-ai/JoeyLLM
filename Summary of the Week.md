@@ -92,14 +92,10 @@ docker rename my_container my_old_container
 # Project Role Sign-Up Sheet
 
 | Role | Name |
-|------|------|
-| **Data Collection Specialist** | Jucheng Du, Haoqing Liu, Guangxin Mi, Pranav Unkule|
-| **Data Cleaning & Processing Engineer** | Jucheng Du, Chenyu Gao, Guangxin Mi, Pranav Unkule|
-| **Model Development Engineer** | Jucheng Du, Chenyu Gao, Haoqing Liu, Guangxin Mi, Ashley Zhu, Pranav Unkule|
-| **Web Development Engineer** | Ashley Zhu, Shuang Liu |
-| **Multimedia & Content Specialist** | Shuang Liu, Ashley Zhu |
-| **Public Relations & Communication** | Shuang Liu |
-| **Deputy and Spokesperson** | Shuang Liu, Haoqing Liu |
+
+| **Spokesperson and Deputy Spokesperson** | Shuang Liu, Pranav Pramod Unkule |
+| **Scrum Master[Sprint 1]** | Unesh Neupane |
+| **Development Team** | Pranav Pramod Unkule, Ashley Zhu, Chenyu Gao, Guangxin Mi, Haoqing Liu, Juncheng Du, Unesh Neupane |
 
 # Project Plan for Next Week
 
