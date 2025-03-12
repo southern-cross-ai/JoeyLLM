@@ -1,7 +1,7 @@
 # Meeting Minutes
 
 **Date:** March 5, 2025  
-**Attendees:** [List of attendees]
+**Attendees:** [ALL members]
 
 ## Agenda
 1. Introduction to the project and each other
