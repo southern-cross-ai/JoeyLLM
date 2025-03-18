@@ -36,8 +36,7 @@ nvidia-smi
 ```
 **Expected Output:**
 - GPU details and CUDA version.
-- **If it fails**: Update your driver. Download the latest WSL2-compatible driver:
-  - 👉 [Download NVIDIA WSL2 Driver](https://developer.nvidia.com/cuda/wsl/download)
+- **If it fails**: Update your driver. Download the latest WSL2-compatible driver
 
 📌 **After installation, restart Windows!**
 
