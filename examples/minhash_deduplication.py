@@ -12,31 +12,33 @@ from datatrove.pipeline.writers.jsonl import JsonlWriter
 from datatrove.utils.hashing import HashConfig
 from datatrove.utils.typeshelper import Languages
 
-
-# you can also change ngrams or the number of buckets and their size here
+# Configure Minhash settings.
+# Higher precision (64 bits) reduces false positives by improving hash accuracy.
 minhash_config = MinhashConfig(
     hash_config=HashConfig(precision=64),
     num_buckets=14,
     hashes_per_bucket=8,
-)  # better precision -> fewer false positives (collisions)
+)
 
+# Define global paths and task parameters.
 S3_MINHASH_BASE_PATH = "s3://mybucket/minhash/"
-
 S3_LOGS_FOLDER = "s3://mybucket/my_minhash_logs_path/"
 LOCAL_LOGS_FOLDER = "my_local_folder_for_slurm_logs/"
-
 TOTAL_TASKS = 1000
 
-# this is the original data that we want to deduplicate
+# Define the reader for the original JSONL data stored on S3.
 INPUT_READER = JsonlReader("s3://mybucket/base_processing/output/")
 
-# stage 1 computes minhash signatures for each task (each task gets a set of files)
+# --- Stage 1: Signature Generation ---
+# Compute minhash signatures for each document to prepare for deduplication.
 stage1 = SlurmPipelineExecutor(
     job_name="mh1",
     pipeline=[
         INPUT_READER,
         MinhashDedupSignature(
-            output_folder=f"{S3_MINHASH_BASE_PATH}/signatures", config=minhash_config, language=Languages.english
+            output_folder=f"{S3_MINHASH_BASE_PATH}/signatures",
+            config=minhash_config,
+            language=Languages.english
         ),
     ],
     tasks=TOTAL_TASKS,
@@ -47,7 +49,8 @@ stage1 = SlurmPipelineExecutor(
     qos="high",
 )
 
-# stage 2 finds matches between signatures in each bucket
+# --- Stage 2: Bucketing ---
+# Group similar signatures into buckets to identify potential duplicate pairs.
 stage2 = SlurmPipelineExecutor(
     job_name="mh2",
     pipeline=[
@@ -66,7 +69,8 @@ stage2 = SlurmPipelineExecutor(
     qos="high",
 )
 
-# stage 3 creates clusters of duplicates using the results from all buckets
+# --- Stage 3: Clustering ---
+# Cluster documents into duplicate groups based on bucket matches.
 stage3 = SlurmPipelineExecutor(
     job_name="mh3",
     pipeline=[
@@ -86,13 +90,14 @@ stage3 = SlurmPipelineExecutor(
     slurm_logs_folder=f"{LOCAL_LOGS_FOLDER}/clusters/slurm_logs",
 )
 
-# stage 4 reads the original input data and removes all but 1 sample per duplicate cluster
-# the data must match exactly stage 1, so number of tasks and the input source must be the same
+# --- Stage 4: Filtering and Writing ---
+# Read the original data, count tokens (for monitoring), and remove duplicates
+# (keeping one sample per duplicate cluster), then write the clean data back.
 stage4 = SlurmPipelineExecutor(
     job_name="mh4",
     pipeline=[
         INPUT_READER,
-        TokensCounter(),  # nice way to see how many tokens we had before and after deduplication
+        TokensCounter(),  # Helps compare token counts pre- and post-deduplication.
         MinhashDedupFilter(
             input_folder=f"{S3_MINHASH_BASE_PATH}/remove_ids",
             exclusion_writer=JsonlWriter(f"{S3_MINHASH_BASE_PATH}/removed"),
@@ -107,5 +112,5 @@ stage4 = SlurmPipelineExecutor(
     slurm_logs_folder=f"{LOCAL_LOGS_FOLDER}/filter/slurm_logs",
 )
 
-
+# Run the final stage to trigger the entire deduplication pipeline.
 stage4.run()
