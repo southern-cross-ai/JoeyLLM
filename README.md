@@ -1,104 +1,136 @@
-# 🧠 Web Dataset Processing Pipelines (Inspired by Datatrove)
+# 🧠 Web Dataset Tokenization & Processing Pipelines (FineWeb-Inspired)
 
-This project provides a set of data processing pipelines for large-scale web datasets.
-It is **heavily inspired by the `examples/` directory in [Hugging Face Datatrove](https://github.com/huggingface/datatrove)**, with customization for educational purposes.
+This project provides scalable, modular pipelines for processing large-scale web datasets, with a primary focus on **tokenizing HuggingFace datasets for language model pretraining**.
 
-Our pipelines are implemented using the `datatrove` framework and cover two major workflows:
-
-- URL-based deduplication using signature comparison
-- FineWeb-style dataset processing with quality filtering and minhash deduplication
+It is **inspired by the [`examples/`](https://github.com/huggingface/datatrove/tree/main/examples) directory in [Hugging Face Datatrove](https://github.com/huggingface/datatrove)**, with customization for education, experimentation, and smaller datasets.
 
 ---
 
-## 📦 Project Structure
+## 🔑 What's Included
 
-├── examples              #Full pipeline for processing data (FineWeb style)
-├── README.md                          # Project overview and usage guide
-└── LICENSE
-
-## 🔁 1. URL Deduplication Pipeline
-
-A three-step local pipeline that:
-
-Reads input JSONL files and generates normalized URL signatures
-
-Detects duplicate URLs using signature matching
-
-Filters out duplicate documents
-
-🚀 Run locally:
-
-```bash
-python url_dedup_pipeline.py <input_folder> <base_output_folder> <sigs_dup_folder>
+```
+.
+├── examples/                       # FineWeb-style full pipelines (legacy)
+├── src/
+│   └── fineweb.py                 # 🔥 Main script: HuggingFace dataset tokenizer + sharder
+├── tokenized_data/                #  Where tokenized shards are saved
+├── LICENSE
+└── README.md
 ```
 
-Output includes:
+---
 
-Deduplicated data in base_output_folder/output/
+## ✨ Main Tool: `fineweb.py` — Tokenize & Shard HuggingFace Datasets
 
-Removed duplicates in base_output_folder/removed/
+`fineweb.py` is the main entry point for this project. It:
 
-## 🌐 2. FineWeb-Style SLURM Pipeline
+- Downloads any HuggingFace dataset
+- Uses GPT-2 tokenizer (via `tiktoken`) to tokenize a selected text field
+- Saves tokens as NumPy `.npy` shards (each ~100M tokens)
+- Works cross-platform (Windows/macOS/Linux), supports multiprocessing
 
-A scalable processing pipeline for Common Crawl data, similar to FineWeb.
-It performs:
+### ✅ How to Run
 
-### 🔹 Base Processing:
+```bash
+python fineweb.py --dataset <HuggingFace dataset path> [--field <fieldname>]
+```
 
-- WARC reading from S3
-- URL filtering
-- HTML content extraction via Trafilatura
-- Language and quality filtering
-- Output to cleaned JSONL
+#### Example:
 
-### 🔹 Minhash Deduplication:
+```bash
+python fineweb.py --dataset SouthernCrossAI/Tweets_cricket --field tweet
+```
 
-- Minhash signature generation
-- Bucketing and clustering
-- Final deduplication and token counting
+- `--dataset` (**required**): the dataset path on HuggingFace
+- `--field` (**optional**, default: `"tweet"`): the key of the text field to tokenize
 
-### 🚀 Run on SLURM:
+### 📍 How to find the correct `--field` name?
+
+Run the following in Python to inspect the structure of the dataset:
 
 ```python
+from datasets import load_dataset
+ds = load_dataset("SouthernCrossAI/Tweets_cricket", split="train")
+print(ds[0])
+```
 
-# Inside fineweb_processing_pipeline.py
+Sample output:
+
+```python
+{
+  "id": 42,
+  "tweet": "Australia wins the match! 🏏",
+  "location": "Melbourne"
+}
+```
+
+In this case, you should use `--field tweet`.
+
+---
+
+### 📁 Output Structure
+
+After running, you'll find tokenized shards in:
+
+```
+tokenized_data/
+└── Tweets_cricket/
+    ├── Tweets_cricket_val_000000.npy
+    ├── Tweets_cricket_train_000001.npy
+    └── ...
+```
+
+Each `.npy` file contains an array of `np.uint16` tokens, suitable for LLM pretraining.
+
+---
+
+## 🧩 (Optional) Other Pipelines
+
+These are legacy or complementary to the main tokenizer.
+
+### 🔁 URL Deduplication Pipeline
+
+```bash
+python url_dedup_pipeline.py <input_folder> <output_folder> <sig_folder>
+```
+
+- Detects and removes duplicate documents by URL signature
+- Output in `output/` and `removed/`
+
+---
+
+### 🌐 FineWeb-Style SLURM Pipeline (Advanced)
+
+For large-scale Common Crawl data (with `Trafilatura`, language filtering, MinHash dedup):
+
+Run using SLURM-compatible environment:
+
+```python
 main_processing_executor.run()
 stage4.run()
 ```
 
-Other intermediate stages (signature, bucket, cluster) run automatically via `depends=` logic.
+Requires SLURM, S3 access, and modifying variables like `DUMP_TO_PROCESS`, `MAIN_OUTPUT_PATH`.
 
-Make sure to update the following variables before running:
-
-- DUMP_TO_PROCESS
-- MAIN_OUTPUT_PATH
+---
 
 ## 🛠️ Requirements
 
-Install the official datatrove library:
-
 ```bash
-pip install git+https://github.com/huggingface/datatrove.git
+pip install datasets tiktoken tqdm numpy
 ```
 
-Other dependencies:
+For full FineWeb pipelines: also requires `datatrove`, SLURM, and optionally AWS CLI.
 
-- Python 3.8+
-- NumPy
-- SLURM (for distributed processing)
+---
 
-## 📚 Inspiration & Attribution
+## 🙌 Acknowledgements
 
-This repository is adapted from and inspired by the examples/ directory in:
-
-## 👉 Hugging Face Datatrove GitHub Repository
-
-We gratefully acknowledge their open-source contributions.
+Built upon the open-source work of [Hugging Face Datatrove](https://github.com/huggingface/datatrove).  
+This repo is for educational, research, and non-commercial use.
 
 ### 👨‍💻 Contributors
 
 Guangxin, Ashley, Erica, Haoqing
 
-📜 License
-This repository is for educational and non-commercial use only.
-Please refer to the Datatrove license for upstream licensing terms.
+📜 Licensed under upstream Datatrove terms where applicable.
