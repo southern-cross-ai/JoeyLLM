@@ -1,5 +1,5 @@
 
-# 🌀 Sprint 1 Review & Retrospective — TechLauncher 2025
+# 🌀 Sprint 1 Review & Retrospective
 
 ## 📆 Sprint Duration
 _Week 04 to Week 06, Semester 1, 2025_
