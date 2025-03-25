@@ -97,6 +97,7 @@ _Week 04 to Week 06, Semester 1, 2025_
 - Prepare data loaders and experiment logging framework.
 - Add checkpoints for internal peer reviews.
 - Integrate testing and monitoring in early dev stages.
+- Help the client grow their community member base using media strategies
 
 ---
 
