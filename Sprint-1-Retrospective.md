@@ -15,18 +15,18 @@ _Week 04 to Week 06, Semester 1, 2025_
 - Collaborate and manage tasks using Agile tools.
 
 ### 📌 Completed Tasks (15)
-- ✅ Project Setup:
+- ✅ **Project Setup:**
   - SSH Keys, Python & Docker Environments
   - Communication Channels, Centralised Repo
-- ✅ Learning & Documentation:
+- ✅ **Learning & Documentation:**
   - GPT-2 video summary (Karpathy)
   - Tutorials & meeting minutes uploaded
   - FineWeb script experiments
   - Code review uploads
-- ✅ Communication & Admin:
+- ✅ **Communication & Admin:**
   - Team stand-ups
   - Client interactions
-- ✅ Data Work:
+- ✅ **Data Work:**
   - Initial skimming and inspection
   - Container setup for JoeyLLM
 
@@ -43,54 +43,67 @@ _Week 04 to Week 06, Semester 1, 2025_
 
 ---
 
-## 🔁 Sprint Retrospective
+## 🔁 Sprint Retrospective — *Start, Stop, Continue*
+
+### ✅ Start
+- 📌 Implement structured peer code reviews to improve code quality.
+- 📌 Define measurable outcomes for technical tasks (e.g., “tokenize 1M rows”).
+
+### ❌ Stop
+- ⛔ Starting too many tasks without finishing current ones.
+- ⛔ Relying on informal updates — centralize logs in Jira/Docs.
+
+### 🔄 Continue
+- 🔁 Effective client meetings and regular updates.
+- 🔁 Good use of Jira and ownership of tasks.
+- 🔁 Daily standups and clear task responsibilities.
+
+---
+
+## 🧮 Assessment Criteria Alignment
 
 ### 🧑‍🤝‍🧑 Stakeholder Engagement
-- ✔ Attended and scheduled client meetings
-- ✔ Shared regular updates and incorporated feedback
-- ✔ Uploaded meeting minutes (KAN-31, KAN-32)
-- ✔ Maintained communication channels
-- ➕ Improvement: Continue more proactive feedback loops.
+- ✔ Scheduled & attended meetings with client.
+- ✔ Shared updates, documented minutes (KAN-31, KAN-32).
+- ✔ Incorporated feedback into planning (KAN-23).
+- 🔄 **Next:** Increase proactive communication and early validation.
 
 ### 🗂 Planning & Organisation
-- ✔ Jira board maintained with clear tasks and assignments
-- ✔ Tasks linked to goals (data, model, pipeline)
-- ✔ Individual responsibilities clear
-- ➕ Improvement: Improve estimations and velocity tracking.
+- ✔ Sprint backlog aligned with project goals.
+- ✔ Clear task breakdown and ownership (Jira).
+- ✔ Estimated timelines set.
+- 🔄 **Next:** Track and refine team velocity metrics.
 
 ### 🛠 Execution & Quality
-- ✔ 15 tasks marked as Done with relevant deliverables
-- ✔ Code and documentation delivered (KAN-28, KAN-25)
-- ➕ Peer reviews are ongoing but can be more structured
-- ➕ Some tasks still in progress — timeboxing needed
+- ✔ Delivered 15 sprint tasks with code/docs.
+- ✔ Code reviews and experiments pushed to repo.
+- 🔄 **Next:** Automate testing & integrate quality checkpoints.
 
 ### 🔍 Reflection & Improvement
-- ✔ Sprint retrospective conducted (this document!)
-- ✔ Key lessons noted: better estimation, workload balance
-- ➕ Adjusted velocity to match team bandwidth
-- ➕ Need to document blockers & solutions during sprint
+- ✔ Retrospective documented here.
+- ✔ Lessons identified — scope control and clearer metrics.
+- 🔄 **Next:** Adjust estimation and add retro insights to planning docs.
 
 ### 🤝 Collaboration & Teamwork
-- ✔ Active participation in daily standups (KAN-19)
-- ✔ Workload balanced among members (as shown on Jira)
-- ✔ Diversity in skill usage (data, modelling, DevOps)
-- ➕ Improve transparency of blockers & support resolution
+- ✔ All members active in standups (KAN-19).
+- ✔ Balanced task distribution and communication.
+- 🔄 **Next:** Pair programming for technical ramp-up & support.
 
 ---
 
 ## 🚀 Action Items for Sprint 2
-- Prioritize tokenization and data pipeline completion
-- Complete in-progress GPT + WandB experimentation
-- Start GPT-2 fine-tuning trials (if a pipeline is ready)
-- Add peer review checkpoints for model components
-- Continue improving backlog estimation & tracking
+- Finalize FineWeb tokenization pipeline.
+- Complete GPT & WandB integration.
+- Prepare data loaders and experiment logging framework.
+- Add checkpoints for internal peer reviews.
+- Integrate testing and monitoring in early dev stages.
 
 ---
 
 ## 📎 Evidence Provided
-- ✅ Jira Kanban (with assignments, statuses, tags)
-- ✅ Meeting Minutes
-- ✅ Documentation & code uploads
-- ✅ Team check-ins, code reviews, task tracking
+- ✅ Jira Kanban board with tracked progress.
+- ✅ Meeting minutes.
+- ✅ GitHub commits, documentation.
+- ✅ Standup tracking and retrospective summary.
 
 ---
