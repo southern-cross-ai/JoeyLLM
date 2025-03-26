@@ -6,19 +6,19 @@ import tiktoken
 from datasets import load_dataset
 from tqdm import tqdm
 
-# 🔧 全局变量（用于子进程）
+# Global variables (for child processes)
 enc = None
 eot = None
 field = None
 
-# 🔧 初始化每个子进程的 tokenizer 等
+# Initialize tokenizer for each child process
 def init_worker(enc_name, eot_token, field_name):
     global enc, eot, field
     enc = tiktoken.get_encoding(enc_name)
     eot = eot_token
     field = field_name
 
-# ✅ 分词函数
+# Tokenize function
 def tokenize(doc):
     tokens = [eot]
     tokens.extend(enc.encode_ordinary(doc[field]))
@@ -38,15 +38,15 @@ def main(args):
     )
     os.makedirs(DATA_CACHE_DIR, exist_ok=True)
 
-    # 下载数据
+    # Download datasets
     fw = load_dataset(dataset_path, split="train")
-    print(f"✅ Loaded dataset: {dataset_path}, total {len(fw)} documents.")
+    print(f"Loaded dataset: {dataset_path}, total {len(fw)} documents.")
 
-    # 初始化 tokenizer（仅主进程）
+    # Initialize tokenizer
     tokenizer = tiktoken.get_encoding("gpt2")
     eot_token = tokenizer._special_tokens['<|endoftext|>']
 
-    # 多进程分词
+    # Main Loop
     mp.freeze_support()
     nprocs = max(1, os.cpu_count() // 2)
     with mp.Pool(nprocs, initializer=init_worker, initargs=("gpt2", eot_token, field_name)) as pool:
