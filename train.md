@@ -8,7 +8,7 @@ This document explains how to train the custom GPT-2 model.
 Pytorch with gpu support
 - Required packages:
   ```bash
-  `pip install -r requirements.txt`
+  pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
 JoeyLLM/  
