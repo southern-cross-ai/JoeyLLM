@@ -20,11 +20,10 @@ JoeyLLM/
 
 ## Monitor with Weights & Biases
 
--Before running training, login to Weights & Biases: 
-    `wandb login
+-Before running training, login to Weights & Biases: `wandb login
 
 ## Training on Single GPU
-    `python train_single_gpu.py
+    python train_single_gpu.py
   
 
 This will:
