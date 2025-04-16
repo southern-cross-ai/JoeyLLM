@@ -11,12 +11,12 @@ Pytorch with gpu support
   `pip install -r requirements.txt`
 
 ## 📁 Project Structure Overview
-JoeyLLM/
-├── config.py              # Contains model and training configuration classes
-├── data.py                # Loads and prepares the dataset
-├── model.py               # Custom GPT-2 architecture implementation
-├── train_single_gpu.py    # Main training script for single GPU
-├── requirements.txt       # Dependencies
+JoeyLLM/  
+├── config.py              # Contains model and training configuration classes  
+├── data.py                # Loads and prepares the dataset  
+├── model.py               # Custom GPT-2 architecture implementation  
+├── train_single_gpu.py    # Main training script for single GPU  
+├── requirements.txt       # Dependencies  
 
 ## Monitor with Weights & Biases
 
