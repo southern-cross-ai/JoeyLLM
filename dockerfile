@@ -4,7 +4,7 @@ FROM ubuntu:24.04
 # Set environment variable for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update system and install necessary packages
+# Update the system and install the necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     vim \
@@ -21,11 +21,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git-lfs \
     && rm -rf /var/lib/apt/lists/*  
 
-# Ensure 'python3' is recognized as 'python'
+# Ensure 'python3' is recognised as 'python'
 RUN ln -sf /usr/bin/python3 /usr/bin/python
-
-# Clone the repository.
-RUN git clone https://github.com/southern-cross-ai/JoeyLLM.git
 
 # Default command (for interactive HPC usage)
 CMD ["/bin/bash"]
