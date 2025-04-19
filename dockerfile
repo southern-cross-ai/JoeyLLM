@@ -24,5 +24,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Ensure 'python3' is recognised as 'python'
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
+# Set working directory
+WORKDIR /workspace
+
+# Copy local code (from build context) into image
+COPY . /workspace
+
 # Default command (for interactive HPC usage)
 CMD ["/bin/bash"]
