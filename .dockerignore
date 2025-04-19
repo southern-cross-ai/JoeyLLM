@@ -1,0 +1,75 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+.conda/
+conda-meta/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs and runtime files
+*.log
+*.out
+*.tmp
+
+# IDE/editor config
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated junk
+.DS_Store
+Thumbs.db
+
+# Git and version control
+.git/
+.gitignore
+
+# Docker-related
+.docker/
+Dockerfile.*
+docker-compose.*
+
+# Data and model files (optional – include selectively)
+data/
+datasets/
+*.csv
+*.tsv
+*.h5
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.jsonl
+
+# PyTorch model artifacts
+*.pt
+*.pth
+*.ckpt
+
+# Python packaging
+*.egg-info/
+build/
+dist/
+*.tar.gz
+*.whl
+
+# Environment & secret files
+.env
+.env.*
+secrets/
+credentials/
+
+# Archive files
+*.zip
+*.tar
+*.gz
+*.bz2
