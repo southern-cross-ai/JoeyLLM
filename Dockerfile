@@ -1,34 +1,81 @@
-# Use Ubuntu 24.04 for stability
-FROM ubuntu:24.04
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*$py.class
 
-# Set environment variable for non-interactive installation
-ENV DEBIAN_FRONTEND=noninteractive
+# Virtual environments
+venv/
+.venv/
+env/
+.conda/
+conda-meta/
 
-# Update the system and install the necessary packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    vim \
-    git \
-    wget \
-    curl \
-    htop \
-    nvtop \
-    python3 \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    openssh-client \
-    git-lfs \
-    && rm -rf /var/lib/apt/lists/*  
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
 
-# Ensure 'python3' is recognised as 'python'
-RUN ln -sf /usr/bin/python3 /usr/bin/python
+# Logs and runtime files
+*.log
+*.out
+*.tmp
 
-# Set working directory
-WORKDIR /workspace
+# IDE/editor config
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
-# Copy local code (from build context) into image
-COPY . /workspace
+# OS-generated junk
+.DS_Store
+Thumbs.db
 
-# Default command (for interactive HPC usage)
-CMD ["/bin/bash"]
+# Git and version control
+.git/
+.gitignore
+
+# Docker-related
+.docker/
+Dockerfile
+Dockerfile.*
+docker-compose.*
+.dockerignore
+
+# Data and model files (optional – include selectively)
+data/
+datasets/
+*.csv
+*.tsv
+*.h5
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.jsonl
+
+# PyTorch model artifacts
+*.pt
+*.pth
+*.ckpt
+
+# Python packaging
+*.egg-info/
+build/
+dist/
+*.tar.gz
+*.whl
+
+# Environment & secret files
+.env
+.env.*
+secrets/
+credentials/
+
+# Archive files
+*.zip
+*.tar
+*.gz
+*.bz2
+
+# Doc files
+*.md
+LICENSE
