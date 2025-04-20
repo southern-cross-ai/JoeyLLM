@@ -37,6 +37,7 @@ Thumbs.db
 .docker/
 Dockerfile.*
 docker-compose.*
+.dockerignore
 
 # Data and model files (optional – include selectively)
 data/
@@ -73,3 +74,7 @@ credentials/
 *.tar
 *.gz
 *.bz2
+
+# Doc Files
+*.md
+
