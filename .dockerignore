@@ -35,6 +35,7 @@ Thumbs.db
 
 # Docker-related
 .docker/
+Dockerfile
 Dockerfile.*
 docker-compose.*
 .dockerignore
@@ -75,6 +76,6 @@ credentials/
 *.gz
 *.bz2
 
-# Doc Files
+# Doc files
 *.md
-
+LICENSE
