@@ -12,10 +12,10 @@ Pytorch with gpu support
 
 ## 📁 Project Structure Overview
 JoeyLLM/  
-├── config.py              # Contains model and training configuration classes  
-├── data.py                # Loads and prepares the dataset  
-├── model.py               # Custom GPT-2 architecture implementation  
-├── train_single_gpu.py    # Main training script for single GPU  
+├── src/config/config.py    # Contains model and training configuration classes  
+├── src/data/data.py    # Loads and prepares the dataset  
+├── src/model/model.py    # Custom GPT-2 architecture implementation  
+├── src/main.py    # Main training script (currently works with for single GPU)
 ├── requirements.txt       # Dependencies  
 
 ## Monitor with Weights & Biases
@@ -23,7 +23,7 @@ JoeyLLM/
 -Before running training, login to Weights & Biases: `wandb login`
 
 ## Training on Single GPU
-    python train_single_gpu.py
+    python src/main.py
   
 
 This will:
