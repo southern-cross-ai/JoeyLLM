@@ -1,1 +1,2 @@
-from .config import ModelConfig, TrainingConfig
+from .config import config
+

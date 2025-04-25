@@ -4,10 +4,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import torch
 from model import JoeyLLM
-from config import ModelConfig
+from config import config 
 
 def test_model():
-    cfg = ModelConfig()
+    cfg = config.model
 
     model = JoeyLLM(
         vocab_size=cfg.vocab_size,
