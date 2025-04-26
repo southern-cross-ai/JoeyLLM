@@ -1,11 +1,12 @@
+from JoeyLLM.config.config import config
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
-def get_dataloaders(batch_size=8):
-    """
-    Loads the Hugging Face dataset and returns PyTorch DataLoaders. This function is meant to be imported and used in your training pipelineand converts the dataset to torch tensors, and wraps it in PyTorch DataLoaders.
-    """
-    dataset = load_dataset("SouthernCrossAI/Gutenberg-Australia-Chunks-512")
+def get_dataloaders(batch_size=None):
+    dataset_name = config.dataset_loader.dataset_name
+    batch_size = batch_size or config.dataset_loader.batch_size
+
+    dataset = load_dataset(dataset_name)
     dataset.set_format(type='torch', columns=['input_ids'])
 
     train_loader = DataLoader(dataset['train'], batch_size=batch_size, shuffle=True)
@@ -13,7 +14,6 @@ def get_dataloaders(batch_size=8):
     test_loader = DataLoader(dataset['test'], batch_size=batch_size)
 
     return train_loader, val_loader, test_loader
-
 
 # ---------------------------------------------
 # 🔧 NOTE FOR FUTURE DEVELOPERS:
