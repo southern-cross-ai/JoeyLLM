@@ -1,14 +1,4 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import torch
-from model import JoeyLLM
-from config import config 
-
-def test_model():
-    cfg = config.model
-
+def Test_Model(cfg):
     model = JoeyLLM(
         vocab_size=cfg.vocab_size,
         max_seq_len=cfg.max_seq_len,
@@ -25,7 +15,4 @@ def test_model():
     print(f"Logits shape: {logits.shape}")  # Should be (batch_size, seq_len, vocab_size)
 
     assert logits.shape == (cfg.batch_size, cfg.max_seq_len, cfg.vocab_size), "Output shape is incorrect!"
-
-if __name__ == "__main__":
-    test_model()
 
