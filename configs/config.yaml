@@ -6,8 +6,6 @@ model:
   num_heads: 8
   num_layers: 4
   dropout: 0.1
-  batch_size: 4
-  device: "auto"
 
 data:
   dataset_out: "SouthernCrossAI/Gutenberg-Australia-Chunks-512"
@@ -18,3 +16,7 @@ data:
   shuffle: true
   use_validation: true
   use_test: true
+
+train:
+  batch_size: 4
+  device: "auto"

@@ -1,16 +1,16 @@
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
-def Dataloaders(config):
+def Dataloaders(configs):
     print("---------Starting Data Step!----------")
-    dataset_in = config.data.dataset_in
-    batch_size = config.data.batch_size
-    columns = config.data.columns
-    shuffle = config.data.shuffle
+    dataset_in = configs.dataset_in
+    batch_size = configs.batch_size
+    columns = configs.columns
+    shuffle = configs.shuffle
 
     print(f"-----Loading Dataset {dataset_in} From HuggingFace!-----")
-    dataset = load_dataset(dataset_in, split=None)  
-    dataset = dataset.with_format("torch", columns=columns)  
+    dataset = load_dataset(dataset_in, split=None)
+    dataset = dataset.with_format("torch", columns=columns)
 
     print("----------Creating Dataloaders!----------")
     train_loader = DataLoader(dataset['train'], batch_size=batch_size, shuffle=shuffle)
@@ -18,5 +18,5 @@ def Dataloaders(config):
     test_loader = DataLoader(dataset['test'], batch_size=batch_size, shuffle=False) if 'test' in dataset else None
     print("----------Dataloaders Done!----------")
 
-
     return train_loader, val_loader, test_loader
+

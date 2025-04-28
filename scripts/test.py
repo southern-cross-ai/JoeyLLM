@@ -15,9 +15,9 @@ def main(cfg: DictConfig):
     print("----------Current config!----------")
     print(OmegaConf.to_yaml(cfg))
     print("---------Testing model!----------")
-    Test_Model(cfg)
+    Test_Model(cfg.model, cfg.data)
     print("---------Testing Data!----------")
-    Test_Dataloaders(cfg)
+    Test_Dataloaders(cfg.data)
     print("---------Finshed Testing!----------")
 
 main()
