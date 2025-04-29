@@ -1,6 +1,6 @@
 # ✅ Code Review: `ci.yml`
 
-**Reviewer:** ChatGPT  
+**Reviewer:** Juncheng Du  
 **Date:** April 29, 2025  
 **File reviewed:** `.github/workflows/ci.yml` in project repository  
 **Purpose:** Implement a basic CI workflow to automatically check code style, type safety, and run tests on push and pull request events.
