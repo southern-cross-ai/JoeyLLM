@@ -16,6 +16,19 @@ Pytorch with gpu support
 JoeyLLM/
 ├── main.py                     # Entry point script: loads config and starts training
 ├── requirements.txt            # Project dependencies
+├── README.md                   # Project overview and usage instructions
+
+├── docker/
+│   └── Dockerfile              # Docker image definition for environment setup
+
+├── docs/
+│   ├── CONTRIBUTING            # Contribution guidelines
+│   ├── LICENSE                 # License file (e.g. MIT)
+│   └── train                   # Project documentation related to training
+
+├── test/
+│   └── pre_run_test.py         # Sanity checks or tests before training
+
 └── src/
     ├── configs/
     │   └── config.yaml         # YAML configuration (Hydra) for model, training, logging
