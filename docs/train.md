@@ -11,25 +11,25 @@ Pytorch with gpu support
   pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
-JoeyLLM/
-├── src/
-│   ├── configs/
+JoeyLLM/  
+├── src/  
+│   ├── configs/  
 │   │   └── config.yaml           # Hydra-compatible YAML config for model, training, logging  
 │
-│   ├── data/
+│   ├── data/  
 │   │   ├── dataset.py            # Loads and batches tokenized dataset for training  
 │   │   ├── test_data.py          # Handles test/validation datasets  
 │   │   └── chunk.py              # Preprocesses raw token sequences into fixed-length chunks  
 │
-│   ├── model/
+│   ├── model/  
 │   │   ├── joeyllm.py            # Core GPT-2 model architecture (decoder blocks, attention, etc.)  
 │   │   └── test_model.py         # Unit tests or experimental evaluation of the model  
 │
-│   ├── tokenizer/
+│   ├── tokenizer/  
 │   │   ├── train_tokenizer.py    # Trains a custom tokenizer from raw text data  
 │   │   └── test_tokenizer.py     # Validates tokenizer behavior (encoding/decoding tests)  
 │
-│   ├── train/
+│   ├── train/  
 │   │   ├── loop.py               # Training loop logic (epochs, logging, loss, etc.)  
 │   │   └── optimizer.py          # Optimizer and scheduler setup (e.g. AdamW)  
 │
