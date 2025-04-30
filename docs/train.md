@@ -15,7 +15,7 @@ JoeyLLM/
 ├── src/configs/config.yaml    # YAML-based model and training configuration using Hydra framework.  
 ├── src/data/data.py    # Loads and prepares the dataset  
 ├── src/model/model.py    # Custom GPT-2 architecture implementation  
-├── src/main.py    # Main training script (currently works with for single GPU)
+├── src/main.py    # Main training script (currently works with for single GPU)  
 ├── requirements.txt       # Dependencies  
 
 ## Monitor with Weights & Biases
