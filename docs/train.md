@@ -11,30 +11,30 @@ Pytorch with gpu support
   pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
-JoeyLLM/  
-├── main.py                       # Entry point script: loads config and starts training  
-├── requirements.txt              # Project dependencies  
+JoeyLLM/
+├── main.py                     # Entry point script: loads config and starts training
+├── requirements.txt            # Project dependencies
+└── src/
+    ├── configs/
+    │   └── config.yaml         # YAML configuration (Hydra) for model, training, logging
 
-└── src/  
-    ├── configs/  
-    │   └── config.yaml           # YAML configuration (Hydra) for model, training, logging  
+    ├── data/
+    │   ├── dataset.py          # Loads and batches tokenized training data
+    │   ├── test_data.py        # Loads/handles validation or test datasets
+    │   └── chunk.py            # Preprocessing script to split long sequences into chunks
 
-    ├── data/  
-    │   ├── dataset.py            # Loads and batches tokenized training data  
-    │   ├── test_data.py          # Loads/handles validation or test datasets  
-    │   └── chunk.py              # Preprocessing script to split long sequences into chunks  
+    ├── model/
+    │   ├── joeyllm.py          # Custom GPT-2 model (transformers, decoder blocks, attention)
+    │   └── test_model.py       # Unit tests or evaluation scripts for model components
 
-    ├── model/  
-    │   ├── joeyllm.py            # Custom GPT-2 model (transformers, decoder blocks, attention)  
-    │   └── test_model.py         # Unit tests or evaluation scripts for model components  
+    ├── tokenizer/
+    │   ├── train_tokenizer.py  # Trains a tokenizer using a raw text corpus
+    │   └── test_tokenizer.py   # Validates tokenizer output and decoding accuracy
 
-    ├── tokenizer/  
-    │   ├── train_tokenizer.py    # Trains a tokenizer using a raw text corpus  
-    │   └── test_tokenizer.py     # Validates tokenizer output and decoding accuracy  
+    └── train/
+        ├── loop.py             # Core training loop (epochs, logging, checkpointing)
+        └── optimizer.py        # Optimizer setup (AdamW)
 
-    └── train/  
-        ├── loop.py               # Core training loop (epochs, logging, etc.)  
-        └── optimizer.py          # Optimizer and scheduler setup (AdamW, etc.)  
 
 ## Monitor with Weights & Biases
 
