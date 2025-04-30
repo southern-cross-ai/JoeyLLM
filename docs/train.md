@@ -11,8 +11,32 @@ Pytorch with gpu support
   pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
-<pre> JoeyLLM/ ├── requirements.txt # Python dependencies └── src/ ├── main.py # Entry point: Hydra config + training start ├── configs/ │ └── config.yaml # YAML configuration for model, training, logging ├── data/ │ ├── dataset.py # Loads and batches the training dataset │ ├── test_data.py # Loads validation/test datasets │ └── chunk.py # Chunks long token sequences (preprocessing) ├── model/ │ ├── joeyllm.py # GPT-2 architecture (transformer blocks, attention) │ └── test_model.py # Unit tests or model verification ├── tokenizer/ │ ├── train_tokenizer.py # Trains a tokenizer from raw text corpus │ └── test_tokenizer.py # Tests tokenization, decoding accuracy └── train/ ├── loop.py # Training loop (loss, steps, logging, W&B) └── optimizer.py # Optimizer/scheduler setup (AdamW, warmup) </pre>
-  
+JoeyLLM/
+├── requirements.txt            # Python dependencies
+
+└── src/
+    ├── main.py                 # Entry point: Hydra config + training start
+
+    ├── configs/
+    │   └── config.yaml         # YAML configuration for model, training, logging
+
+    ├── data/
+    │   ├── dataset.py          # Loads and batches the training dataset
+    │   ├── test_data.py        # Loads validation/test datasets
+    │   └── chunk.py            # Chunks long token sequences (preprocessing)
+
+    ├── model/
+    │   ├── joeyllm.py          # GPT-2 architecture (transformer blocks, attention)
+    │   └── test_model.py       # Unit tests or model verification
+
+    ├── tokenizer/
+    │   ├── train_tokenizer.py  # Trains a tokenizer from raw text corpus
+    │   └── test_tokenizer.py   # Tests tokenization, decoding accuracy
+
+    └── train/
+        ├── loop.py             # Training loop (loss, steps, logging, W&B)
+        └── optimizer.py        # Optimizer/scheduler setup (AdamW, warmup)
+
 
 
 
