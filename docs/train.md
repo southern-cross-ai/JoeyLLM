@@ -11,31 +11,31 @@ Pytorch with gpu support
   pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
-JoeyLLM/  
-├── src/  
-│   ├── configs/  
-│   │   └── config.yaml           # Hydra-compatible YAML config for model, training, logging  
-│
-│   ├── data/  
-│   │   ├── dataset.py            # Loads and batches tokenized dataset for training  
-│   │   ├── test_data.py          # Handles test/validation datasets  
-│   │   └── chunk.py              # Preprocesses raw token sequences into fixed-length chunks  
-│
-│   ├── model/  
-│   │   ├── joeyllm.py            # Core GPT-2 model architecture (decoder blocks, attention, etc.)  
-│   │   └── test_model.py         # Unit tests or experimental evaluation of the model  
-│
-│   ├── tokenizer/  
-│   │   ├── train_tokenizer.py    # Trains a custom tokenizer from raw text data  
-│   │   └── test_tokenizer.py     # Validates tokenizer behavior (encoding/decoding tests)  
-│
-│   ├── train/  
-│   │   ├── loop.py               # Training loop logic (epochs, logging, loss, etc.)  
-│   │   └── optimizer.py          # Optimizer and scheduler setup (e.g. AdamW)  
-│
-│   └── main.py                   # Entry point script: sets up config, model, data, and runs training  
-│
-├── requirements.txt              # Python dependencies for the full pipeline  
+JoeyLLM/
+├── requirements.txt                # Python dependencies
+└── src/
+    ├── main.py                     # Entry point: loads config and starts training
+
+    ├── configs/
+    │   └── config.yaml             # Hydra-compatible configuration file
+
+    ├── data/
+    │   ├── dataset.py              # Loads and batches the training dataset
+    │   ├── test_data.py            # Handles test/validation dataset loading
+    │   └── chunk.py                # Chunks long tokenized text into fixed-size segments
+
+    ├── model/
+    │   ├── joeyllm.py              # GPT-2 model implementation (attention, transformer blocks)
+    │   └── test_model.py           # Unit tests or model evaluation logic
+
+    ├── tokenizer/
+    │   ├── train_tokenizer.py      # Trains a custom tokenizer on raw corpus
+    │   └── test_tokenizer.py       # Validates tokenization and decoding
+
+    └── train/
+        ├── loop.py                 # Core training loop logic (epochs, backprop, logging)
+        └── optimizer.py            # Optimizer and scheduler setup (AdamW, warmup, etc.)
+  
 
 
 
