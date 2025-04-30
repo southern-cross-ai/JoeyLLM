@@ -1,5 +1,5 @@
 import torch
-from model.joeyllm import JoeyLLM  # Adjust if your path is different
+from .joeyllm import JoeyLLM  # Adjust if your path is different
 
 def Test_Model(model_configs, data_configs):
     # Instantiate the model
