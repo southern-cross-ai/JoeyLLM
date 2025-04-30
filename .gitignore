@@ -177,4 +177,4 @@ wandb/
 *.swp
 
 # Ignore Hydra outputs
-outputs/
+outputs/*
