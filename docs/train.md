@@ -11,12 +11,16 @@ Pytorch with gpu support
   pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
-JoeyLLM/  
-├── src/configs/config.yaml    # YAML-based model and training configuration using Hydra framework.  
-├── src/data/data.py    # Loads and prepares the dataset  
-├── src/model/model.py    # Custom GPT-2 architecture implementation  
-├── src/main.py    # Main training script (currently works with for single GPU)  
-├── requirements.txt       # Dependencies  
+JoeyLLM/
+├── src/
+│   ├── configs/config.yaml      # YAML-based model & training configuration
+│   ├── data/
+│   │   ├── data.py              # Loads and batches the training dataset
+│   │   └── chunk.py             # Preprocessing script to chunk tokenized data
+│   └── model/model.py           # Custom GPT-2 model and transformer blocks
+├── src/main.py                  # Main training script using Hydra config
+├── requirements.txt             # Python dependencies
+
 
 ## Monitor with Weights & Biases
 
