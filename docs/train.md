@@ -36,7 +36,7 @@ JoeyLLM/
     └── train/
         ├── loop.py             # Core training loop (epochs, logging, checkpointing)
         └── optimizer.py        # Optimizer setup (AdamW)
- 
+ ```
 
 
 ## Monitor with Weights & Biases
