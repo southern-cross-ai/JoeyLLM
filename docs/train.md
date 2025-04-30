@@ -11,6 +11,8 @@ Pytorch with gpu support
   pip install -r requirements.txt
 
 ## 📁 Project Structure Overview
+
+```text
 JoeyLLM/
 ├── main.py                     # Entry point script: loads config and starts training
 ├── requirements.txt            # Project dependencies
