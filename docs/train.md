@@ -12,33 +12,29 @@ Pytorch with gpu support
 
 ## 📁 Project Structure Overview
 JoeyLLM/
-├── requirements.txt            # Python dependencies
+├── main.py                       # Entry point script: loads config and starts training
+├── requirements.txt              # Project dependencies
 
 └── src/
-    ├── main.py                 # Entry point: Hydra config + training start
-
     ├── configs/
-    │   └── config.yaml         # YAML configuration for model, training, logging
+    │   └── config.yaml           # YAML configuration (Hydra) for model, training, logging
 
     ├── data/
-    │   ├── dataset.py          # Loads and batches the training dataset
-    │   ├── test_data.py        # Loads validation/test datasets
-    │   └── chunk.py            # Chunks long token sequences (preprocessing)
+    │   ├── dataset.py            # Loads and batches tokenized training data
+    │   ├── test_data.py          # Loads/handles validation or test datasets
+    │   └── chunk.py              # Preprocessing script to split long sequences into chunks
 
     ├── model/
-    │   ├── joeyllm.py          # GPT-2 architecture (transformer blocks, attention)
-    │   └── test_model.py       # Unit tests or model verification
+    │   ├── joeyllm.py            # Custom GPT-2 model (transformers, decoder blocks, attention)
+    │   └── test_model.py         # Unit tests or evaluation scripts for model components
 
     ├── tokenizer/
-    │   ├── train_tokenizer.py  # Trains a tokenizer from raw text corpus
-    │   └── test_tokenizer.py   # Tests tokenization, decoding accuracy
+    │   ├── train_tokenizer.py    # Trains a tokenizer using a raw text corpus
+    │   └── test_tokenizer.py     # Validates tokenizer output and decoding accuracy
 
     └── train/
-        ├── loop.py             # Training loop (loss, steps, logging, W&B)
-        └── optimizer.py        # Optimizer/scheduler setup (AdamW, warmup)
-
-
-
+        ├── loop.py               # Core training loop (epochs, logging, checkpointing)
+        └── optimizer.py          # Optimizer and scheduler setup (AdamW, LR warmup)
 
 ## Monitor with Weights & Biases
 
