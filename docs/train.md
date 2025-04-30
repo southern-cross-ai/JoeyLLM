@@ -14,28 +14,28 @@ Pytorch with gpu support
 JoeyLLM/
 ├── src/
 │   ├── configs/
-│   │   └── config.yaml           # Hydra-compatible YAML config for model, training, logging
+│   │   └── config.yaml           # Hydra-compatible YAML config for model, training, logging  
 │
 │   ├── data/
-│   │   ├── dataset.py            # Loads and batches tokenized dataset for training
-│   │   ├── test_data.py          # Optional: handles test/validation datasets
-│   │   └── chunk.py              # Preprocesses raw token sequences into fixed-length chunks
+│   │   ├── dataset.py            # Loads and batches tokenized dataset for training  
+│   │   ├── test_data.py          # Handles test/validation datasets  
+│   │   └── chunk.py              # Preprocesses raw token sequences into fixed-length chunks  
 │
 │   ├── model/
-│   │   ├── joeyllm.py            # Core GPT-2 model architecture (decoder blocks, attention, etc.)
-│   │   └── test_model.py         # Unit tests or experimental evaluation of the model
+│   │   ├── joeyllm.py            # Core GPT-2 model architecture (decoder blocks, attention, etc.)  
+│   │   └── test_model.py         # Unit tests or experimental evaluation of the model  
 │
 │   ├── tokenizer/
-│   │   ├── train_tokenizer.py    # Trains a custom tokenizer from raw text data
-│   │   └── test_tokenizer.py     # Validates tokenizer behavior (encoding/decoding tests)
+│   │   ├── train_tokenizer.py    # Trains a custom tokenizer from raw text data  
+│   │   └── test_tokenizer.py     # Validates tokenizer behavior (encoding/decoding tests)  
 │
 │   ├── train/
-│   │   ├── loop.py               # Training loop logic (epochs, logging, loss, etc.)
-│   │   └── optimizer.py          # Optimizer and scheduler setup (e.g. AdamW, LR warmup)
+│   │   ├── loop.py               # Training loop logic (epochs, logging, loss, etc.)  
+│   │   └── optimizer.py          # Optimizer and scheduler setup (e.g. AdamW)  
 │
-│   └── main.py                   # Entry point script: sets up config, model, data, and runs training
+│   └── main.py                   # Entry point script: sets up config, model, data, and runs training  
 │
-├── requirements.txt              # Python dependencies for the full pipeline
+├── requirements.txt              # Python dependencies for the full pipeline  
 
 
 
