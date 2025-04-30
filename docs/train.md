@@ -1,6 +1,6 @@
-# GPT-2 Training Guide
+# JoeyLLM GPT-2 model Training Guide
 
-This document explains how to train the custom GPT-2 model.
+This document explains how to train the custom JoeyLLM GPT-2 model.
 
 ## Prerequisites
 - Python 3.10+
@@ -13,13 +13,30 @@ Pytorch with gpu support
 ## 📁 Project Structure Overview
 JoeyLLM/
 ├── src/
-│   ├── configs/config.yaml      # YAML-based model & training configuration
+│   ├── configs/
+│   │   └── config.yaml           # Hydra-compatible YAML config for model, training, logging
+│
 │   ├── data/
-│   │   ├── data.py              # Loads and batches the training dataset
-│   │   └── chunk.py             # Preprocessing script to chunk tokenized data
-│   └── model/model.py           # Custom GPT-2 model and transformer blocks
-├── src/main.py                  # Main training script using Hydra config
-├── requirements.txt             # Python dependencies
+│   │   ├── dataset.py            # Loads and batches tokenized dataset for training
+│   │   ├── test_data.py          # Optional: handles test/validation datasets
+│   │   └── chunk.py              # Preprocesses raw token sequences into fixed-length chunks
+│
+│   ├── model/
+│   │   ├── joeyllm.py            # Core GPT-2 model architecture (decoder blocks, attention, etc.)
+│   │   └── test_model.py         # Unit tests or experimental evaluation of the model
+│
+│   ├── tokenizer/
+│   │   ├── train_tokenizer.py    # Trains a custom tokenizer from raw text data
+│   │   └── test_tokenizer.py     # Validates tokenizer behavior (encoding/decoding tests)
+│
+│   ├── train/
+│   │   ├── loop.py               # Training loop logic (epochs, logging, loss, etc.)
+│   │   └── optimizer.py          # Optimizer and scheduler setup (e.g. AdamW, LR warmup)
+│
+│   └── main.py                   # Entry point script: sets up config, model, data, and runs training
+│
+├── requirements.txt              # Python dependencies for the full pipeline
+
 
 
 ## Monitor with Weights & Biases
