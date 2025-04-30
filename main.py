@@ -1,24 +1,29 @@
-import sys
-import os
-
-# Add project root to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+import torch
+import torch.nn as nn
+import torch.optim as optim
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from model import JoeyLLM, Test_Model 
-from data import Test_Dataloaders
+from model import JoeyLLM
+from data import Dataloaders
 
 @hydra.main(config_path="../configs", config_name="config", version_base=None)
 
 def main(cfg: DictConfig):
-    print("----------Current config!----------")
+    
+    print("Loading Configs!")
     print(OmegaConf.to_yaml(cfg))
-    print("---------Testing model!----------")
-    Test_Model(cfg.model, cfg.data)
-    print("---------Testing Data!----------")
-    Test_Dataloaders(cfg.data)
-    print("---------Finshed Testing!----------")
 
-main()
+    print("Loading Dataset!")
+    train_loader, val_loader, _ = Dataloaders(cfg.data)
+
+    print("Loading Model!")
+    
+    print("Loading Model to GPU!")
+
+    print("Loading Training Script")
+    
+    print("Training Done!")
+
+if __name__ == "__main__":
+    main()
 
