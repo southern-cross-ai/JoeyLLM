@@ -3,10 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from model import JoeyLLM
-from data import Dataloaders
+from src import JoeyLLM
+from src import Dataloaders
 
-@hydra.main(config_path="../configs", config_name="config", version_base=None)
+@hydra.main(config_path="src/configs", config_name="config", version_base=None)
 
 def main(cfg: DictConfig):
     
