@@ -1,0 +1,74 @@
+name: Bug Report
+description: Report an unexpected behavior or error in the LLM training, inference, or infrastructure.
+title: "[BUG] <brief description>"
+labels: [bug]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐞 Bug Report
+        Please provide as much detail as possible to help us reproduce and diagnose the issue.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Your platform, PyTorch version, CUDA version, and whether you’re using DDP or single-GPU.
+      placeholder: |
+        e.g., Ubuntu 22.04, PyTorch 2.1.0, CUDA 12.1, torchrun + DDP on 4xA100
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the unexpected behavior.
+      placeholder: |
+        When running pretraining with sequence length > 2048, loss becomes NaN after 300 steps...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to Reproduce
+      description: If possible, provide exact steps to reproduce the issue.
+      placeholder: |
+        1. Clone repo at commit: abc123
+        2. Run `python train.py --config config.yaml`
+        3. Observe CUDA OOM error on forward pass
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and Stack Traces
+      description: Paste relevant log output, tracebacks, or screenshots.
+      render: shell
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      description: What behavior were you expecting instead?
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any additional context, links to code, commits, or PRs that could help.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched the existing issues.
+          required: true
+        - label: I am using the latest version of the `main` branch.
+          required: true
+        - label: I have tried to isolate the issue and reproduce it with a minimal config.
+          required: false
