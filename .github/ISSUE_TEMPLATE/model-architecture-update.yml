@@ -43,7 +43,6 @@ body:
     attributes:
       label: Implementation Checklist
       options:
-        - label: Change reviewed with team
         - label: Code updated in `joeyllm.py`
-        - label: Unit tests updated or added
+        - label: Unit tests updated
         - label: Docs or comments updated
