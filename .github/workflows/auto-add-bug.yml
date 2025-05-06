@@ -1,19 +1,20 @@
-name: Auto-Add Bug Reports to Bug Tracker
+name: Auto-Add Bugs to Bug Tracker Project
 
 on:
   issues:
     types: [opened, labeled]
 
 jobs:
-  add-bug-to-tracker:
-    runs-on: ubuntu-latest
+  add-bug-to-project:
     if: contains(github.event.issue.labels.*.name, 'bug')
+    runs-on: ubuntu-latest
     steps:
-      - name: Add issue to Bug Tracker project
-        uses: actions/add-to-project@v1
+      - name: Add issue to GitHub Project (Bug Tracker)
+        uses: srggrs/assign-one-project-github-action@1.2.1
         with:
-          project-url: https://github.com/orgs/southern-cross-ai/projects/58
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fields: |
-            Status: To triage
+          project: https://github.com/orgs/southern-cross-ai/projects/58
+          column_name: To triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
