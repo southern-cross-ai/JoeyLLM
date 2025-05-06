@@ -15,4 +15,5 @@ jobs:
           project-url: https://github.com/orgs/southern-cross-ai/projects/58
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fields: |
-            Status: Bug
+            Status: To triage
+
