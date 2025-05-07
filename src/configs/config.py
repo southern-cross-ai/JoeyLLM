@@ -1,44 +1,72 @@
-from typing      import List
-from pydantic    import BaseModel, Field, validator
+"""
+config.py
 
-# 1) Reuse your existing JoeyConfig for all the model-specific fields…
-class JoeyConfig(BaseModel):
-    vocab_size:   int   = Field(...,  gt=0, description="Size of the vocabulary")
-    max_seq_len:  int   = Field(...,  gt=0, description="Maximum sequence length")
-    embed_dim:    int   = Field(...,  gt=0, description="Embedding dimensionality")
-    num_layers:   int   = Field(...,  gt=0, description="Number of transformer layers")
-    num_heads:    int   = Field(...,  gt=0, description="Number of attention heads")
-    dropout:      float = Field(0.1, ge=0.0, le=1.0, description="Dropout probability")
+Defines application configuration schemas using Pydantic,
+and provides a helper to load and validate settings from a YAML file.
+"""
 
-    @validator('embed_dim')
-    def embed_divisible_by_heads(cls, v, values):
-        heads = values.get('num_heads')
-        if heads and v % heads != 0:
-            raise ValueError('embed_dim must be divisible by num_heads')
-        return v
+from pydantic import BaseModel, Field
+from typing import List, Literal
+import yaml
 
-# 2) Wrap the extra “type” key around JoeyConfig:
-class ModelConfig(JoeyConfig):
-    type: str = Field(..., description="Which model class to instantiate")
+# --- Model configuration schema ---
+class ModelConfig(BaseModel):
+    """
+    Configuration for the transformer model hyperparameters.
+    """
+    type: Literal["Joeyllm"]  # model type identifier
+    vocab_size: int = Field(..., gt=0, description="Size of the vocabulary")  # vocabulary size
+    max_seq_len: int = Field(..., gt=0, description="Max sequence length")  # max tokens per input
+    embed_dim: int = Field(..., gt=0, description="Embedding dimensionality")  # embedding vector size
+    num_heads: int = Field(..., gt=1, description="Attention heads")  # number of attention heads
+    num_layers: int = Field(..., gt=0, description="Transformer layers")  # number of transformer blocks
+    dropout: float = Field(..., ge=0, le=1, description="Dropout rate")  # dropout probability
 
-# 3) Define the data-section schema:
+# --- Data pipeline configuration schema ---
 class DataConfig(BaseModel):
-    dataset_out:    str
-    dataset_in:     str
-    batch_size:     int
-    columns:        List[str]
-    format:         str
-    shuffle:        bool
-    use_validation: bool
-    use_test:       bool
+    """
+    Configuration for data loading and preprocessing.
+    """
+    dataset_out: str  # path or identifier for output dataset
+    dataset_in: str  # path or identifier for input dataset
+    batch_size: int = Field(..., gt=0)  # batch size for data loader
+    columns: List[str]  # list of column names to include
+    format: Literal["torch", "tf", "np"]  # data format
+    shuffle: bool  # whether to shuffle the dataset
+    use_validation: bool  # whether to split out a validation set
+    use_test: bool  # whether to split out a test set
 
-# 4) Define the train-section schema:
+# --- Training loop configuration schema ---
 class TrainConfig(BaseModel):
-    batch_size: int
-    device:     str
+    """
+    Configuration for the training loop parameters.
+    """
+    batch_size: int = Field(..., gt=0)  # batch size used during training
+    device: Literal["cpu", "gpu", "auto"] = "auto"  # device for training ('cpu', 'gpu', or 'auto')
 
-# 5) Top-level config that ties them all together:
+# --- Top-level application configuration ---
 class AppConfig(BaseModel):
-    model: ModelConfig
-    data:  DataConfig
-    train: TrainConfig
+    """
+    Aggregates all configuration sections into one object.
+    """
+    model: ModelConfig  # model hyperparameters
+    data: DataConfig  # data processing settings
+    train: TrainConfig  # training settings
+
+    @classmethod
+    def from_yaml(cls, path: str) -> "AppConfig":
+        """
+        Load configuration from a YAML file and validate against the schema.
+
+        Args:
+            path (str): Path to the YAML configuration file.
+
+        Returns:
+            AppConfig: An instance populated with validated config values.
+
+        Raises:
+            pydantic.ValidationError: If the YAML does not conform to the schema.
+        """
+        with open(path, "r") as f:
+            raw = yaml.safe_load(f)
+        return cls.parse_obj(raw)
