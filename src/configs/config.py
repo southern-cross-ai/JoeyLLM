@@ -6,6 +6,12 @@ class Config(BaseModel):
     Minimal configuration schema: only validates vocab_size.
     """
     vocab_size: int  # vocabulary size
+    type: str
+    max_seq_len: int
+    embed_dim: int
+    num_heads: int
+    num_layers: int
+    dropout: float
 
     @classmethod
     def from_yaml(cls, path: str) -> "Config":
