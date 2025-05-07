@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
+from joey.config import ModelConfig
 
 
 class JoeyLLM(nn.Module):
     """Main Joey Model."""
-    def __init__(self, configs):
+    def __init__(self, configs:ModelConfig):
         """
         Args:
             configs (DictConfig): Model configuration settings.

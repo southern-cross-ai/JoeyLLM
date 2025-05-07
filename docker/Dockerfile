@@ -1,4 +1,3 @@
-# Use Ubuntu 22.04 for stability
 FROM ubuntu:22.04
 
 # Set environment variable for non-interactive installation
