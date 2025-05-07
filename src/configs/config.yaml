@@ -28,7 +28,6 @@ train:
   gradient_accumulation_steps: 4
   checkpoint_path: "checkpoints"
   wandb:
-    project: "JoeyLLM"
-    entity: "SouthernCrossAI"
-    team: "JoeyLLM"
+    project: test-joeyllm
+    entity: JoeyLLM  # Replace withyour WandB entity
     log: true
