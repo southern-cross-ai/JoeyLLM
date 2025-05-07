@@ -1,14 +1,17 @@
 import torch
 import torch.nn as nn
+from configs.config import ModelConfig
+
 
 class JoeyLLM(nn.Module):
     """Main Joey Model."""
-    def __init__(self, configs):
+    def __init__(self, configs:ModelConfig):
         """
         Args:
             configs (DictConfig): Model configuration settings.
         """
         super().__init__()
+        assert configs.type.lower() == "joeyllm"
 
         self.vocab_size = configs.vocab_size
         self.max_seq_len = configs.max_seq_len
