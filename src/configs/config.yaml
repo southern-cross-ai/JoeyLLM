@@ -19,4 +19,16 @@ data:
 
 train:
   batch_size: 4
-  device: "auto"
+  device: "cuda"  # Use "cuda" or "cpu"
+  epochs: 10
+  learning_rate: 5e-4
+  weight_decay: 0.01
+  save_every: 2  # Save every N epochs
+  resume_from: null  # Path to resume checkpoint or null
+  gradient_accumulation_steps: 4
+  checkpoint_path: "checkpoints"
+  wandb:
+    project: "JoeyLLM"
+    entity: "SouthernCrossAI"
+    team: "JoeyLLM"
+    log: true
