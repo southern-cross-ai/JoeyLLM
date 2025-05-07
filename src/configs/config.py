@@ -1,4 +1,7 @@
 from pydantic import BaseModel, Field, root_validator
+from typing import List
+from typing import Literal
+
 
 
 class JoeyConfig(BaseModel):
@@ -34,7 +37,9 @@ class JoeyConfig(BaseModel):
 
 # 2) Wrap the extra “type” key around JoeyConfig:
 class ModelConfig(JoeyConfig):
-    type: str = Field(..., description="Which model class to instantiate")
+    type: Literal["joeyllm"] = Field(...,
+        description="Which model class to instantiate (must be 'joeyllm')")
+
 
 # 3) Define the data-section schema:
 class DataConfig(BaseModel):
