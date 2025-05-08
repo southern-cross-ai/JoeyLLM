@@ -3,6 +3,7 @@ from omegaconf import DictConfig, OmegaConf
 import os
 from pathlib import Path
 from src.configs.config import JoeyConfig
+from pprint import pprint
 
 
 # Set working directory to project root
@@ -19,7 +20,7 @@ print("Working directory manually set to:", os.getcwd())
 def main(cfg: DictConfig):
     print("✅ Loading Configs:")
     validated_cfg = JoeyConfig(**OmegaConf.to_container(cfg, resolve=True))
-    print(validated_cfg)
+    pprint(validated_cfg.model_dump())
 
 
 if __name__ == "__main__":
