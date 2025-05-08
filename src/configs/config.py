@@ -1,23 +1,49 @@
-import yaml
 from pydantic import BaseModel
+from typing import List, Optional
 
-class Config(BaseModel):
-    """
-    Minimal configuration schema: only validates vocab_size.
-    """
+# --- Model Config ---
+class ModelConfig(BaseModel):
     name: str
     vocab_size: int
-    max_seq_len: in
-    embed_dim: int 
+    max_seq_len: int
+    embed_dim: int
     num_heads: int
     num_layers: int
     dropout: float
 
-    @classmethod
-    def from_yaml(cls, path: str) -> "Config":
-        """
-        Load configuration from config.yaml 
-        """
-        with open(path, 'r') as f:
-            raw = yaml.safe_load(f)
-        return cls.parse_obj(raw)
+# --- Data Config ---
+class DataConfig(BaseModel):
+    dataset_out: str
+    dataset_in: str
+    batch_size: int
+    columns: List[str]
+    format: str
+    shuffle: bool
+    use_validation: bool
+    use_test: bool
+
+# --- Training Config ---
+class TrainConfig(BaseModel):
+    batch_size: int
+    device: str
+    epochs: int
+    learning_rate: float
+    weight_decay: float
+    save_every: int
+    resume_from: Optional[str] = None
+    gradient_accumulation_steps: int
+    checkpoint_path: str
+
+# --- Weights & Biases Config ---
+class WandbConfig(BaseModel):
+    project: str
+    entity: str
+    log: bool
+
+# --- Top-level config ---
+class JoeyConfig(BaseModel):
+    model: ModelConfig
+    data: DataConfig
+    train: TrainConfig
+    wandb: WandbConfig
+
