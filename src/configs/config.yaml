@@ -2,16 +2,7 @@ defaults:
   - model: joey_12
   - data: gutenberg_au
   - train: 1GPU
-  - __self__
-
-model:
-  type: "Joeyllm"
-  vocab_size: 50257
-  max_seq_len: 64
-  embed_dim: 768
-  num_heads: 8
-  num_layers: 4
-  dropout: 0.1
+  - _self_
 
 data:
   dataset_out: "SouthernCrossAI/Gutenberg-Australia-Chunks-512"
