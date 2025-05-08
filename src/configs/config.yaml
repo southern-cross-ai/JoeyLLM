@@ -1,3 +1,9 @@
+defaults:
+  - model: joey_12
+  - data: gutenberg_au
+  - train: 1GPU
+  - __self__
+
 model:
   type: "Joeyllm"
   vocab_size: 50257
