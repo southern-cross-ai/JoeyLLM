@@ -2,6 +2,5 @@ defaults:
   - model: joey_12
   - data: gutenberg_au
   - train: 1GPU
-  - wandb: test-joeyllm
   - _self_
 

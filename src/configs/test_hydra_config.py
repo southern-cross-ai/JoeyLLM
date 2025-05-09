@@ -1,4 +1,4 @@
-from config.load_config import load_config
+from src.configs.load_config import load_config
 from omegaconf import DictConfig
 
 def test_hydra_loads_config():
@@ -6,6 +6,6 @@ def test_hydra_loads_config():
 
     assert isinstance(cfg, DictConfig)
 
-    for section in ["model", "data", "train", "wandb"]:
+    for section in ["model", "data", "train"]:
         assert section in cfg
 
