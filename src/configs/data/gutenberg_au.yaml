@@ -1,0 +1,9 @@
+dataset_out: "SouthernCrossAI/Gutenberg-Australia-Chunks-512"
+dataset_in: "SouthernCrossAI/Gutenberg-Australia-Chunks-512"
+batch_size: 8
+columns: ["input_ids"]
+format: "torch"
+shuffle: true
+use_validation: true
+use_test: true
+

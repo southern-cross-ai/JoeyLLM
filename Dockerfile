@@ -1,5 +1,4 @@
-# Use Ubuntu 24.04 for stability
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 # Set environment variable for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive

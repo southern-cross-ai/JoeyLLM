@@ -1,32 +1,6 @@
-model:
-  type: "Joeyllm"
-  vocab_size: 100256
-  max_seq_len: 512  # Maximum sequence length
-  embed_dim: 768
-  num_heads: 8
-  num_layers: 2
-  dropout: 0.1
+defaults:
+  - model: joey_12
+  - data: gutenberg_au
+  - train: 1GPU
+  - _self_
 
-data:
-  dataset_out: "SouthernCrossAI/Gutenberg-Australia-Chunks-512"
-  dataset_in: "SouthernCrossAI/Gutenberg-Australia-Chunks-512"
-  batch_size: 8
-  columns: ["input_ids"]
-  format: "torch"
-  shuffle: true
-  use_validation: true
-  use_test: true
-
-train:
-  batch_size: 1
-  device: "cuda"  # Use "cuda" or "cpu"
-  epochs: 1
-  learning_rate: 5e-4
-  weight_decay: 0.01
-  save_every: 2  # Save every N epochs
-  resume_from: null  # Path to resume checkpoint or null
-  gradient_accumulation_steps: 4
-  checkpoint_path: "checkpoints"
-  wandb:
-    project: test-joeyllm
-    log: true
