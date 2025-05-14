@@ -15,6 +15,9 @@ def main(cfg: DictConfig):
         print("❌ Validation Error:")
         raise e
 
+    print("✅ Pydantic Model Config:")
+    print(model_cfg)
+
     print("Loading Dataset!")
     train_loader, val_loader, _ = Dataloaders(cfg.data)
 
