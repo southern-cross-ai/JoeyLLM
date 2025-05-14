@@ -1,318 +1,437 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>JoeyLLM | Australia’s First Fair Dinkum AI Language Model</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>JoeyLLM | Australia's First Fair Dinkum AI Language Model</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-            background-image: url('2wqp59t4zvfe1.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            backdrop-filter: blur(5px);
-        }
-                /* Navigation Bar Styles */
-        .navbar {
-            background-color: rgba(120, 134, 107, 0.9);
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+        color: #333;
+        background-image: url("background.jpeg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        backdrop-filter: blur(5px);
+      }
 
-        .navbar-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            height: 70px;
-        }
+      /* Navigation Bar Styles */
+      .navbar {
+        background-color: rgba(120, 134, 107, 0.9);
+        position: sticky;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
 
-        .logo {
-            display: flex;
-            align-items: center;
-        }
+      .navbar-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        height: 70px;
+      }
 
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
+      .logo {
+        display: flex;
+        align-items: center;
+      }
 
-        .logo-text {
-            color: white;
-            font-weight: bold;
-            font-size: 1.5rem;
-            text-decoration: none;
+      .logo img {
+        height: 40px;
+        margin-right: 10px;
+      }
+
+      .logo-text {
+        color: white;
+        font-weight: bold;
+        font-size: 1.5rem;
+        text-decoration: none;
+      }
+
+      .nav-links {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .nav-links li {
+        margin: 0 15px;
+        position: relative;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-size: 1.1rem;
+        padding: 10px 0;
+        display: inline-block;
+        transition: all 0.3s ease;
+      }
+
+      .nav-links a:hover {
+        color: #f8e16c;
+        transform: translateY(-2px);
+      }
+
+      /* Underline effect */
+      .nav-links a::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        background: #f8e16c;
+        bottom: 0;
+        left: 0;
+        transition: width 0.3s ease;
+      }
+
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+
+      /* Mobile menu button */
+      .menu-toggle {
+        display: none;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 21px;
+        cursor: pointer;
+      }
+
+      .menu-toggle span {
+        display: block;
+        height: 3px;
+        width: 100%;
+        background-color: white;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+      }
+
+      /* Scroll effect for navbar */
+      .navbar.scrolled {
+        background-color: rgba(120, 134, 107, 1);
+        height: 60px;
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .menu-toggle {
+          display: flex;
         }
 
         .nav-links {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
+          position: absolute;
+          top: 70px;
+          left: 0;
+          background-color: rgba(120, 134, 107, 0.95);
+          width: 100%;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px 0;
+          transform: translateY(-150%);
+          transition: transform 0.3s ease;
+          box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-links.active {
+          transform: translateY(0);
         }
 
         .nav-links li {
-            margin: 0 15px;
-            position: relative;
+          margin: 15px 0;
         }
+      }
 
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 1.1rem;
-            padding: 10px 0;
-            display: inline-block;
-            transition: all 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: #f8e16c;
-            transform: translateY(-2px);
-        }
-
-        /* Underline effect */
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            background: #f8e16c;
-            bottom: 0;
-            left: 0;
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* Mobile menu button */
-        .menu-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 30px;
-            height: 21px;
-            cursor: pointer;
-        }
-
-        .menu-toggle span {
-            display: block;
-            height: 3px;
-            width: 100%;
-            background-color: white;
-            border-radius: 3px;
-            transition: all 0.3s ease;
-        }
-
-        /* Scroll effect for navbar */
-        .navbar.scrolled {
-            background-color: rgba(120, 134, 107, 1);
-            height: 60px;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .menu-toggle {
-                display: flex;
-            }
-
-            .nav-links {
-                position: absolute;
-                top: 70px;
-                left: 0;
-                background-color: rgba(120, 134, 107, 0.95);
-                width: 100%;
-                flex-direction: column;
-                align-items: center;
-                padding: 20px 0;
-                transform: translateY(-150%);
-                transition: transform 0.3s ease;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-            }
-
-            .nav-links.active {
-                transform: translateY(0);
-            }
-
-            .nav-links li {
-                margin: 15px 0;
-            }
-        }
-        header {
-            background-color: rgba(120, 134, 107, 0.7);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            margin-top: 70px;
-        }
-        header h1 { margin: 0; }
-        .content {
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
-            max-width: 800px;
-            margin: 20px auto;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
-        }
-        .content h2 { color: #0055a5; }
-        .content code { background-color: #eee; padding: 2px 4px; border-radius: 4px; }
-        .content pre { background-color: #eee; padding: 10px; border-radius: 4px; overflow-x: auto; }
-        footer {
-            background-color: rgba(120, 134, 107, 0.7);
-            color: white;
-            text-align: center;
-            padding: 15px;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
+      /* Rest of your existing styles */
+      header {
+        background-color: rgba(120, 134, 107, 0.7);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        margin-top: 70px; /* Added to account for fixed navbar */
+      }
+      header h1 {
+        margin: 0;
+      }
+      .content {
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        max-width: 800px;
+        margin: 20px auto;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      }
+      .content h2 {
+        color: #0055a5;
+      }
+      .content code {
+        background-color: #eee;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      .content pre {
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      footer {
+        background-color: rgba(120, 134, 107, 0.7);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+      }
     </style>
-</head>
-<body>
-<header>
-    <h1>JoeyLLM | Australia’s First Fair Dinkum AI Language Model</h1>
-</header>
-<div class="content">
-    <h2>G'day, mate! 🏄‍♂️ Welcome to JoeyLLM</h2>
-    <p>Welcome to JoeyLLM, the next-gen Aussie AI that speaks your language – whether it's English, Aussie slang, or even a bit of Strayan bush poetry.</p>
-    <p>We’re on a mission to build Australia’s first culturally and linguistically tailored large language model (LLM). Unlike your regular AI that doesn’t know the difference between a bottle-o and a servo, JoeyLLM will be trained on a rich dataset of Australian contexts, including indigenous languages, regional slang, and local knowledge.</p>
-    <p>By the end of this project, we want JoeyLLM to be the <strong>Steve Irwin</strong> of AI – smart, culturally aware, and ready to take on the world! 🐊</p>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="navbar-container">
+        <div class="logo">
+          <a href="#" class="logo-text">🦘 JoeyLLM</a>
+        </div>
+        <div class="menu-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#why">Why JoeyLLM</a></li>
+          <li><a href="#goals">Goals</a></li>
+          <li><a href="#tech">Tech</a></li>
+          <li><a href="#involved">Get Involved</a></li>
+          <li><a href="#team">Team</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+        </ul>
+      </div>
+    </nav>
 
-    <h2>🌏 Why JoeyLLM?</h2>
-    <p>Most AI models think <code>thongs</code> are flip-flops and that <code>football</code> means soccer. Not on our watch! 🚫⚽</p>
-    <ul>
-        <li><strong>✅ Understands Aussie Culture</strong> – Indigenous languages, regional dialects, and why we shorten every word.</li>
-        <li><strong>✅ Ethical AI</strong> – No dodgy biases, just a fair go for all.</li>
-        <li><strong>✅ Open Source</strong> – Because AI should be shared like a good backyard barbie.</li>
-        <li><strong>✅ Built for Australia</strong> – Made for industries, universities, and the community (not just Silicon Valley).</li>
-    </ul>
+    <header>
+      <h1>JoeyLLM | Australia's First Fair Dinkum AI Language Model</h1>
+    </header>
+    <div class="content">
+      <section id="about">
+        <h2>G'day, mate! 🏄‍♂️ Welcome to JoeyLLM</h2>
+        <p>
+          Welcome to JoeyLLM, the next-gen Aussie AI that speaks your language –
+          whether it's English, Aussie slang, or even a bit of Strayan bush
+          poetry.
+        </p>
+        <p>
+          We're on a mission to build Australia's first culturally and
+          linguistically tailored large language model (LLM). Unlike your
+          regular AI that doesn't know the difference between a bottle-o and a
+          servo, JoeyLLM will be trained on a rich dataset of Australian
+          contexts, including indigenous languages, regional slang, and local
+          knowledge.
+        </p>
+        <p>
+          By the end of this project, we want JoeyLLM to be the
+          <strong>Steve Irwin</strong> of AI – smart, culturally aware, and
+          ready to take on the world! 🐊
+        </p>
+      </section>
 
-    <h2>🚀 Project Goals</h2>
-    <ul>
-        <li>Build a scalable AI model that doesn’t get confused when you say <code>Chuck a uey</code> 🛻</li>
-        <li>Publish open-source datasets and research (because we’re not gatekeepers)</li>
-        <li>Get industry, academia, and everyday Aussies involved in making AI actually useful Down Under</li>
-    </ul>
+      <section id="why">
+        <h2>🌏 Why JoeyLLM?</h2>
+        <p>
+          Most AI models think <code>thongs</code> are flip-flops and that
+          <code>football</code> means soccer. Not on our watch! 🚫⚽
+        </p>
+        <ul>
+          <li>
+            <strong>✅ Understands Aussie Culture</strong> – Indigenous
+            languages, regional dialects, and why we shorten every word.
+          </li>
+          <li>
+            <strong>✅ Ethical AI</strong> – No dodgy biases, just a fair go for
+            all.
+          </li>
+          <li>
+            <strong>✅ Open Source</strong> – Because AI should be shared like a
+            good backyard barbie.
+          </li>
+          <li>
+            <strong>✅ Built for Australia</strong> – Made for industries,
+            universities, and the community (not just Silicon Valley).
+          </li>
+        </ul>
+      </section>
 
-    <h2>🏗️ Technical Foundation</h2>
-    <p>JoeyLLM is powered by state-of-the-art transformer architectures, just like GPT, but with more Vegemite. 🥪</p>
-    <ul>
-        <li>High-quality Australian datasets (yes, that includes regional footy banter)</li>
-        <li>Fine-tuning for ethical AI (we won’t teach it to call everything a <code>drop bear</code>)</li>
-        <li>Making it smart enough to handle real Australian language and culture</li>
-    </ul>
+      <section id="goals">
+        <h2>🚀 Project Goals</h2>
+        <ul>
+          <li>
+            Build a scalable AI model that doesn't get confused when you say
+            <code>Chuck a uey</code> 🛻
+          </li>
+          <li>
+            Publish open-source datasets and research (because we're not
+            gatekeepers)
+          </li>
+          <li>
+            Get industry, academia, and everyday Aussies involved in making AI
+            actually useful Down Under
+          </li>
+        </ul>
+      </section>
 
-    <h2>🤝 Get Involved</h2>
-    <p>Reckon you’ve got what it takes to help train an AI that knows the difference between <code>mate</code> and <code>maaate</code>? Join us!</p>
-    <ul>
-        <li>📢 <a href="https://github.com/JoeyLLM" target="_blank">GitHub Discussions</a></li>
-        <li>🛠️ <a href="https://github.com/JoeyLLM/contribute" target="_blank">Contributing Guide</a></li>
-        <li>📄 <a href="https://github.com/JoeyLLM/wiki" target="_blank">Project Wiki</a></li>
-    </ul>
+      <section id="tech">
+        <h2>🏗️ Technical Foundation</h2>
+        <p>
+          JoeyLLM is powered by state-of-the-art transformer architectures, just
+          like GPT, but with more Vegemite. 🥪
+        </p>
+        <ul>
+          <li>
+            High-quality Australian datasets (yes, that includes regional footy
+            banter)
+          </li>
+          <li>
+            Fine-tuning for ethical AI (we won't teach it to call everything a
+            <code>drop bear</code>)
+          </li>
+          <li>
+            Making it smart enough to handle real Australian language and
+            culture
+          </li>
+        </ul>
+      </section>
 
-    <h2>👥 Meet the Team</h2>
-    <p>We're a team of developers, researchers, and everyday Aussies passionate about making AI reflect the real Australia:</p>
-    <ul>
-        <li><strong>Erica</strong> – Project Manager & Human-Interactive Computing Specialist</li>
-        <li><strong>Ashley</strong> – Data Specialist and model support
-        <li><strong>Pranav</strong> – Model Developer & Engineer</li>
-        <li><strong>Unesh</strong> – Model Developer & Engineer</li>
-        <li><strong>Michael</strong> – Model Developer & Engineer, Data Specialist</li>
-        <li><strong>Haoqing</strong> – Model Developer & Engineer, Testing</li>
-        <li><strong>Juncheng</strong> – Model Developer & Engineer, Testing</li>
-        <li><strong>Chenyu</strong> – Model Developer & Engineer, Testing</li>
-    </ul>
+      <section id="involved">
+        <h2>🤝 Get Involved</h2>
+        <p>
+          Reckon you've got what it takes to help train an AI that knows the
+          difference between <code>mate</code> and <code>maaate</code>? Join us!
+        </p>
+        <ul>
+          <li>
+            📢
+            <a href="https://github.com/JoeyLLM" target="_blank"
+              >GitHub Discussions</a
+            >
+          </li>
+          <li>
+            🛠️
+            <a href="https://github.com/JoeyLLM/contribute" target="_blank"
+              >Contributing Guide</a
+            >
+          </li>
+          <li>
+            📄
+            <a href="https://github.com/JoeyLLM/wiki" target="_blank"
+              >Project Wiki</a
+            >
+          </li>
+        </ul>
+      </section>
 
-    <h2>🧪 Try It Out (Coming Soon!)</h2>
-    <p>We’re working on a web demo where you can chat with JoeyLLM in proper Aussie lingo. Stay tuned!</p>
+      <section id="team">
+        <h2>👥 Meet the Team</h2>
+        <p>
+          We're a team of developers, researchers, and everyday Aussies
+          passionate about making AI reflect the real Australia:
+        </p>
+        <ul>
+          <li>
+            <strong>Erica</strong> – Project Manager & Human-Interactive
+            Computing Specialist
+          </li>
+          <li><strong>Ashley</strong> – Data Specialist and model support</li>
+          <li><strong>Pranav</strong> – Model Developer & Engineer</li>
+          <li><strong>Unesh</strong> – Model Developer & Engineer</li>
+          <li>
+            <strong>Michael</strong> – Model Developer & Engineer, Data
+            Specialist
+          </li>
+          <li>
+            <strong>Haoqing</strong> – Model Developer & Engineer, Testing
+          </li>
+          <li>
+            <strong>Juncheng</strong> – Model Developer & Engineer, Testing
+          </li>
+          <li><strong>Chenyu</strong> – Model Developer & Engineer, Testing</li>
+        </ul>
+      </section>
 
-    <h2>🗣️ What People Are Saying</h2>
-    <blockquote>
-        <p>“Finally, an AI that gets what I mean when I say ‘arvo’!” </p>
-    </blockquote>
+      <section id="roadmap">
+        <h2>📅 Project Roadmap</h2>
+        <ul>
+          <li><strong>Feburary 2025</strong> – Data collection and Cleaning</li>
+          <li><strong>May 2025</strong> – Open-source release of JoeyLLM v1</li>
+          <li>
+            <strong>Ongoing</strong> – Community contributions via pull request
+            & fine-tuning
+          </li>
+        </ul>
+      </section>
 
-    
-    <h2>📅 Project Roadmap</h2>
-    <ul>
-        <li><strong>Feburary 2025</strong> – Data collection and Cleaning</li>
-        <li><strong>May 2025</strong> – Open-source release of JoeyLLM v1</li>
-        <li><strong>Ongoing</strong> – Community contributions via pull request & fine-tuning</li>
-    </ul>
+      <!-- Rest of the content sections... -->
 
-    <h2>🔍 Navigating the Repo</h2>
-    <p>Feel free to explore our <strong>main</strong> branch. You’ll find:</p>
-    <ul>
-        <li><code>docker/</code>: Docker workspace for containerized development.</li>
-        <li><code>test/</code>: Test suites and scripts. <a href="https://github.com/southern-cross-ai/JoeyLLM/tree/main/test" target="_blank">View tests</a></li>
-        <li><code>src/</code>: Model code structure (tokenizer, model, data, training). <a href="https://github.com/southern-cross-ai/JoeyLLM/tree/main/src" target="_blank">Browse src</a></li>
-        <li><code>docs/</code>: Documentation, including <code>CONTRIBUTING</code> for detailed contribution guidelines.</li>
-    </ul>
-    <p><strong>Main</strong> is protected—fork, open a pull request, and we’ll review within one business week before merging.</p>
+      <p style="text-align: center; font-size: 2em">🦘</p>
+      <p style="text-align: center">
+        (Joey's keeping an eye on you while you scroll!)
+      </p>
+    </div>
+    <footer>
+      <p>Made with love by JoeyLLM Team 🇦🇺</p>
+    </footer>
 
-    <h2>📘 GPT-2 Model Training Guide</h2>
-    <p>This guide explains how to train the custom JoeyLLM GPT-2 model.</p>
-    <h3>Prerequisites</h3>
-    <ul>
-        <li>Python 3.10+</li>
-        <li>NVIDIA GPU with CUDA 12.4+ and PyTorch with GPU support</li>
-        <li>Install required packages:
-            <pre><code>pip install -r requirements.txt</code></pre>
-        </li>
-    </ul>
-    <h3>Project Structure Overview</h3>
-    <pre><code>JoeyLLM/
-├── main.py                     # Entry point: loads config and starts training
-├── requirements.txt            # Dependencies
-├── README.md                   # Repo overview
-├── docker/
-│   └── Dockerfile              # Container setup
-├── docs/
-│   ├── CONTRIBUTING            # Contribution guidelines
-│   ├── LICENSE                 # License file
-│   └── train                   # Training docs
-├── test/
-│   └── pre_run_test.py         # Sanity checks
-└── src/
-    ├── configs/
-    │   └── config.yaml         # Hydra configs
-    ├── data/
-    │   ├── dataset.py          # Dataset loader
-    │   ├── test_data.py        # Validation/test data
-    │   └── chunk.py            # Data chunking
-    ├── model/
-    │   ├── joeyllm.py          # Custom GPT-2 model
-    │   └── test_model.py       # Model tests
-    ├── tokenizer/
-    │   ├── train_tokenizer.py  # Tokenizer training
-    │   └── test_tokenizer.py   # Tokenizer tests
-    └── train/
-        ├── loop.py             # Training loop
-        └── optimizer.py        # Optimizer setup
-</code></pre>
-    <h3>Monitor with Weights & Biases</h3>
-    <p>Before training, login:<br><code>wandb login</code></p>
-    <h3>Training on Single GPU</h3>
-    <pre><code>python src/main.py</code></pre>
-    <p>This will load the model, load 25% of the dataset, start training with W&B logging, and save checkpoints each epoch.</p>
+    <!-- JavaScript for navbar effects -->
+    <script>
+      // Toggle mobile menu
+      const menuToggle = document.querySelector(".menu-toggle");
+      const navLinks = document.querySelector(".nav-links");
 
-    <p style="text-align: center; font-size: 2em;">🦘</p>
-    <p style="text-align: center;">(Joey’s keeping an eye on you while you scroll!)</p>
-</div>
-<footer>
-    <p>Made with love by JoeyLLM Team 🇦🇺</p>
-</footer>
-</body>
+      menuToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+      });
+
+      // Navbar scroll effect
+      window.addEventListener("scroll", () => {
+        const navbar = document.querySelector(".navbar");
+        if (window.scrollY > 50) {
+          navbar.classList.add("scrolled");
+        } else {
+          navbar.classList.remove("scrolled");
+        }
+      });
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          // Close mobile menu if open
+          navLinks.classList.remove("active");
+
+          const targetId = this.getAttribute("href");
+          if (targetId === "#") return;
+
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80, // Adjust for navbar height
+              behavior: "smooth",
+            });
+          }
+        });
+      });
+    </script>
+  </body>
 </html>
