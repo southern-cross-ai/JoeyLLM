@@ -24,7 +24,7 @@ def main(cfg: DictConfig):
 
     print("Loading Training Script")
     trainer = JoeyLLMTrainer(cfg, model, train_loader, val_loader)
-    trainer.train()
+    trainer.train_single_gpu()
     print("Training Done!")
 
 if __name__ == "__main__":

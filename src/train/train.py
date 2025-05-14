@@ -12,6 +12,7 @@ from omegaconf import DictConfig, OmegaConf
 class JoeyLLMTrainer:
     """
     Trainer class for training JoeyLLM models using PyTorch with support for:
+    - Single GPU training
     - Gradient accumulation
     - Checkpoint saving and resuming
     - Learning rate scheduling
@@ -60,9 +61,8 @@ class JoeyLLMTrainer:
         self.use_wandb = cfg.train.wandb.log
         if self.use_wandb:
             wandb.init(
-                project=cfg.train.wandb.project,
-                entity=cfg.train.wandb.entity,
-                name=f"train-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+                # project=cfg.train.wandb.project,
+                name=f"train-{datetime.now().strftime('%d%m%Y-%H%M%S')}",
                 config=OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
             )
             wandb.watch(model)
@@ -87,7 +87,7 @@ class JoeyLLMTrainer:
 
         path = os.path.join(self.cfg.train.checkpoint_path, f"joeyllm_epoch_{self.epoch}.pt")
         torch.save(checkpoint, path)
-        print(f"✅ Saved checkpoint at epoch {self.epoch}")
+        print(f"Saved checkpoint at epoch {self.epoch}")
 
     def load_checkpoint(self):
         """
@@ -113,13 +113,13 @@ class JoeyLLMTrainer:
             self.epoch = checkpoint['epoch'] + 1
             self.step = checkpoint['step']
 
-            print(f"🔁 Resumed training from epoch {self.epoch}")
+            print(f"Resumed training from epoch {self.epoch}")
         except Exception as e:
-            print(f"❌ Error loading checkpoint: {e}")
+            print(f"Error loading checkpoint: {e}")
 
-    def train(self):
+    def train_single_gpu(self):
         """
-        Main training loop over epochs and batches with:
+        Main training loop (for single gpu) over epochs and batches with:
         - Gradient accumulation
         - Periodic checkpoint saving
         - Loss logging
@@ -162,7 +162,7 @@ class JoeyLLMTrainer:
                 if self.use_wandb:
                     wandb.log({"loss": loss.item() * self.accum_steps, "epoch": epoch})
 
-            print(f"📉 Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
+            print(f"Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
 
             # Save checkpoint
             if (epoch + 1) % self.cfg.train.save_every == 0:
