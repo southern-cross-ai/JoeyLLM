@@ -11,7 +11,7 @@ class JoeyLLM(nn.Module):
             configs (DictConfig): Model configuration settings.
         """
         super().__init__()
-        assert configs.type.lower() == "joeyllm"
+        assert configs.name.lower() == "joeyllm"    # Changed from configs.type to configs.name
 
         self.vocab_size = configs.vocab_size
         self.max_seq_len = configs.max_seq_len
