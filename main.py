@@ -19,7 +19,7 @@ def main(cfg: DictConfig):
     print(model_cfg)
 
     print("Loading Dataset!")
-    train_loader, val_loader, _ = Dataloaders(cfg.data)
+    train_loader, val_loader, _ = Dataloaders(cfg.data.dataset_in, cfg.data.batch_size, cfg.data.columns, cfg.data.shuffle)
 
     print("Loading Model!")
     model = JoeyLLM(cfg.model)
