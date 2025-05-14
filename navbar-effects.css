@@ -1,0 +1,297 @@
+/* Advanced Navigation Bar Effects for JoeyLLM Website */
+
+/* Hover Effects for Navigation Links */
+
+/* 1. Glow Effect */
+.nav-links a:hover {
+    text-shadow: 0 0 10px rgba(248, 225, 108, 0.7);
+}
+
+/* 2. Bounce Effect - Add this class to links with JavaScript */
+.bounce {
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+/* 3. Gradient Underline Effect - Alternative to the simple underline */
+.nav-links a.gradient-underline::after {
+    background: linear-gradient(90deg, #f8e16c, #ff9d00);
+}
+
+/* 4. Pill Effect - Transform links into pills on hover */
+.nav-links a.pill-effect:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 8px 15px;
+    margin: -8px -15px;
+}
+
+/* 5. Scale Effect */
+.nav-links a.scale-effect:hover {
+    transform: scale(1.1);
+}
+
+/* Active Link Styles */
+.nav-links a.active {
+    color: #f8e16c;
+    font-weight: bold;
+}
+
+.nav-links a.active::after {
+    width: 100%;
+    background: #f8e16c;
+}
+
+/* Dropdown Menu Effect */
+.nav-links .dropdown {
+    position: relative;
+}
+
+.nav-links .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: rgba(120, 134, 107, 0.95);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.nav-links .dropdown:hover .dropdown-content {
+    display: block;
+    opacity: 1;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-10px) translateX(-50%);}
+    to {opacity: 1; transform: translateY(0) translateX(-50%);}
+}
+
+.nav-links .dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.nav-links .dropdown-content a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mega Menu Effect */
+.nav-links .mega-menu {
+    position: static;
+}
+
+.nav-links .mega-menu-content {
+    display: none;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    background-color: rgba(120, 134, 107, 0.95);
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 20px;
+    top: 70px;
+}
+
+.nav-links .mega-menu:hover .mega-menu-content {
+    display: flex;
+    animation: fadeDown 0.3s ease;
+}
+
+@keyframes fadeDown {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.mega-menu-column {
+    flex: 1;
+    padding: 10px;
+}
+
+.mega-menu-column h3 {
+    color: #f8e16c;
+    margin-top: 0;
+}
+
+/* Sticky Navbar Animation */
+.navbar {
+    transition: all 0.4s ease;
+}
+
+.navbar.scrolled {
+    padding: 5px 0;
+    background-color: rgba(120, 134, 107, 0.98);
+}
+
+.navbar.scrolled .logo-text {
+    font-size: 1.3rem;
+}
+
+.navbar.scrolled .nav-links a {
+    font-size: 1rem;
+}
+
+/* Mobile Menu Animation */
+.menu-toggle span {
+    transition: all 0.3s ease;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Search Bar Animation */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.search-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.search-container:hover .search-input,
+.search-input:focus {
+    width: 150px;
+    padding: 5px 10px;
+    border-bottom: 1px solid white;
+}
+
+/* Notification Badge */
+.nav-item-with-badge {
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: #f8e16c;
+    color: #333;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(248, 225, 108, 0.7);
+    }
+    
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(248, 225, 108, 0);
+    }
+    
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(248, 225, 108, 0);
+    }
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: rotate(180deg);
+}
+
+/* Dark Theme Classes (to be toggled with JavaScript) */
+.dark-theme {
+    background-color: #222;
+    color: #f4f4f4;
+}
+
+.dark-theme .navbar {
+    background-color: rgba(40, 44, 52, 0.9);
+}
+
+.dark-theme .content {
+    background-color: rgba(40, 44, 52, 0.8);
+}
+
+.dark-theme .content h2 {
+    color: #61dafb;
+}
+
+.dark-theme .nav-links a:hover {
+    color: #61dafb;
+}
+
+.dark-theme .nav-links a::after {
+    background: #61dafb;
+}
+
+/* Australian Flag Animation for Special Links */
+.aussie-flag-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.aussie-flag-link::before {
+    content: '🇦🇺';
+    position: absolute;
+    top: -30px;
+    left: 0;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.aussie-flag-link:hover::before {
+    opacity: 1;
+    top: -20px;
+}
