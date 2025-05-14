@@ -1,29 +1,20 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
 import hydra
-from omegaconf import DictConfig, OmegaConf
-from src import JoeyLLM
-from src import Dataloaders
+from omegaconf import DictConfig
+from configs import JoeyConfig 
 
-@hydra.main(config_path="src/configs", config_name="config", version_base=None)
-
+@hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
-    
-    print("Loading Configs!")
-    print(OmegaConf.to_yaml(cfg))
+    # Validate with Pydantic
+    try:
+        model_cfg = JoeyConfig(**cfg)
+    except Exception as e:
+        print("❌ Validation Error:")
+        raise e
 
-    print("Loading Dataset!")
-    train_loader, val_loader, _ = Dataloaders(cfg.data)
-
-    print("Loading Model!")
-    
-    print("Loading Model to GPU!")
-
-    print("Loading Training Script")
-    
-    print("Training Done!")
+    print("✅ Pydantic Model Config:")
+    print(model_cfg)
 
 if __name__ == "__main__":
     main()
 
+    

@@ -34,16 +34,9 @@ class TrainConfig(BaseModel):
     gradient_accumulation_steps: int
     checkpoint_path: str
 
-# --- Weights & Biases Config ---
-class WandbConfig(BaseModel):
-    project: str
-    entity: str
-    log: bool
-
 # --- Top-level config ---
 class JoeyConfig(BaseModel):
     model: ModelConfig
     data: DataConfig
     train: TrainConfig
-    wandb: WandbConfig
 
