@@ -1,51 +1,67 @@
-# 🦘 JoeyLLM | Australia’s First Fair Dinkum AI Language Model  
+# 🦘 JoeyLLM | Australia’s Sovereign Foundational AI Model
 
-G'day, mate! 🏄‍♂️ Welcome to **JoeyLLM**, the **next-gen Aussie AI** that speaks your language – whether it's English, Aussie slang, or even a bit of Strayan bush poetry.  
+**JoeyLLM** is an open-source, developer-led initiative to build **Australia’s first sovereign foundational language model (LLM)**—designed to reflect national values, understand local language, and serve long-term public and strategic interests.
 
-We’re on a mission to build **Australia’s first culturally and linguistically tailored large language model (LLM)**. Unlike your regular AI that doesn’t know the difference between a **bottle-o** and a **servo**, **JoeyLLM** will be trained on a rich dataset of Australian contexts, **including indigenous languages, regional slang, and local knowledge**.  
-
-By the end of this project, we want **JoeyLLM to be the Steve Irwin of AI – smart, culturally aware, and ready to take on the world!** 🐊  
+This is not a fine-tuned version of an overseas model. JoeyLLM is **foundational infrastructure**—a homegrown base layer for AI innovation, national capability, and digital independence.
 
 ---
 
-## 🌏 Why JoeyLLM?  
-Most AI models think "thongs" are flip-flops and that "football" means soccer. **Not on our watch!** 🚫⚽  
+## 🇦🇺 Why JoeyLLM?
 
-✅ **Understands Aussie Culture** – Indigenous languages, regional dialects, and why we shorten every word.  
-✅ **Ethical AI** – No dodgy biases, just a fair go for all.  
-✅ **Open Source** – Because AI should be shared like a good backyard barbie.  
-✅ **Built for Australia** – Made for **industries, universities, and the community** (not just Silicon Valley).  
+Today’s AI models are overwhelmingly developed offshore, trained on global data that doesn’t reflect Australian context, needs, or sovereignty. JoeyLLM is designed to change that.
 
----
-
-## 🚀 Project Goals  
-- Build a **scalable AI model** that doesn’t get confused when you say "Chuck a uey" 🛻  
-- Publish **open-source datasets and research** (because we’re not gatekeepers)  
-- Get **industry, academia, and everyday Aussies** involved in making AI actually useful Down Under  
+- ✅ **Sovereign Capability** – A foundational model built, trained, and governed in Australia  
+- ✅ **Culturally Aligned** – Incorporates Australian English, Indigenous languages, regional expressions, and public-domain Australian knowledge  
+- ✅ **Open Source** – Transparent, auditable, and permissively licensed  
+- ✅ **Trusted Infrastructure** – Built with a focus on safety, integrity, and national interest  
 
 ---
 
-## 🏗️ Technical Foundation  
-JoeyLLM is powered by state-of-the-art transformer architectures, just like GPT, **but with more Vegemite**. 🥪  
+## 🎯 Project Objectives
 
-We focus on:  
-- **High-quality Australian datasets** (yes, that includes regional footy banter)  
-- **Fine-tuning for ethical AI** (we won’t teach it to call everything a "drop bear")  
-- **Making it smart enough to handle real Australian language and culture**  
-
+- Build an Australian foundational LLM using high-quality, diverse, and locally relevant datasets  
+- Support downstream applications across research, public sector, education, and national industries  
+- Release open-source training pipelines, datasets, and model checkpoints for auditability and reuse  
+- Contribute to long-term sovereign digital capability through open infrastructure  
 
 ---
 
-## 🤝 Get Involved  
-Reckon you’ve got what it takes to **help train an AI that knows the difference between "mate" and "maaate"?** Join us!  
+## 🧠 Technical Overview
 
-📢 **Join the Discussion**: [GitHub Discussions](#)  
-🛠️ **Contribute**: Check out our [Contributing Guide](#)  
-📄 **Read the Docs**: [Project Wiki](#)  
+JoeyLLM is built using modern transformer-based architectures, designed for performance, extensibility, and fine-tuning across multiple domains.
+
+Focus areas include:
+
+- Pretraining on Australian-relevant corpora and curated local knowledge  
+- Training on secure, Australian-hosted compute infrastructure  
+- Supporting downstream fine-tuning for health, education, legal, public sector, and more  
+- Publishing model weights, code, and documentation for transparency and open science  
 
 ---
 
-## 📜 License  
-JoeyLLM is **open-source**, so feel free to **fork it, tweak it, and teach it more Aussie slang**.  
+## 🤝 How to Get Involved
 
-🚀 *Let’s build the AI that even a kangaroo would be proud of!* 🇦🇺🐨 
+JoeyLLM is driven by a DevRes (developer-researcher) community focused on building real public-interest AI. You can help by contributing to:
+
+- Model training & evaluation  
+- Dataset curation and filtering  
+- Tooling, docs, and audits  
+- Deployment and benchmarking
+
+- 📢 **Join the discussion**: [GitHub Discussions](#)  
+- 🛠️ **Contribute**: [See our Contributing Guide](#)  
+- 📄 **Docs & Resources**: [Visit the Wiki](#)  
+
+---
+
+## 📝 License
+
+JoeyLLM is released under an open-source license to support sovereign AI development in the public interest. You’re welcome to fork it, build on it, and use it to support downstream applications across research, public services, and responsible innovation.
+
+---
+
+## 🦘 A Sovereign *Foundational* Model with a National Mission
+
+JoeyLLM is being developed to meet Australia’s strategic need for a **locally governed foundational model**—one that supports national resilience, trusted public-sector adoption, and innovation rooted in Australian values.
+
+This is not just a model—it’s **foundational AI infrastructure** for a sovereign digital future.
