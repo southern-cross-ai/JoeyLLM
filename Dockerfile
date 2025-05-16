@@ -24,11 +24,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Ensure 'python3' is recognised as 'python'
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-# Set working directory
-WORKDIR /workspace
+# Copy repo code into /src folder
+COPY . /src
 
-# Copy local code (from build context) into image
-COPY . /workspace
+# Set default shell working directory to something *other than* /src
+WORKDIR /root
 
 # Default command (for interactive HPC usage)
 CMD ["/bin/bash"]
