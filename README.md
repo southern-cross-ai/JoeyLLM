@@ -50,7 +50,8 @@ JoeyLLM is driven by a DevRes (developer-researcher) community focused on buildi
 
 - 📢 **Join the discussion**: [GitHub Discussions](https://github.com/southern-cross-ai/JoeyLLM/discussions)  
 - 🛠️ **Contribute**: [See our Contributing Guide](https://github.com/southern-cross-ai/JoeyLLM/wiki/Contributing)  
-- 📄 **Docs & Resources**: [Visit the Wiki](https://github.com/southern-cross-ai/JoeyLLM/wiki)  
+- 📄 **Docs & Resources**: [Visit the Wiki](https://github.com/southern-cross-ai/JoeyLLM/wiki)
+- 📉 **Data Collection**: [See data collection and how to contribute](https://github.com/southern-cross-ai/JoeyLLM/wiki/Data-Collection-and-How-to-Contribute)
 
 ---
 
