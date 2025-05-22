@@ -138,11 +138,14 @@ class JoeyLLMTrainer:
                 # Move inputs to the correct device
                 input_ids = batch["input_ids"].to(self.device)
 
-                # Forward pass
-                outputs = self.model(input_ids)
+                outputs = self.model(input_ids[:, :-1])
+                targets = input_ids[:, 1:]
 
-                # Compute token-level loss
-                loss = self.criterion(outputs.view(-1, outputs.size(-1)), input_ids.view(-1))
+                loss = self.criterion(
+                    outputs.view(-1, outputs.size(-1)),
+                    targets.reshape(-1)
+                )   
+
 
                 # Normalize loss by gradient accumulation steps
                 loss = loss / self.accum_steps
