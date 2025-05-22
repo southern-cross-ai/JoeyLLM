@@ -178,3 +178,4 @@ wandb/
 
 # Ignore Hydra outputs
 outputs/*
+checkpoints/*
