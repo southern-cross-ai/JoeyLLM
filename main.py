@@ -9,7 +9,6 @@ from train import JoeyLLMTrainer
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
     print("✅ Loaded Config:")
-    print(cfg)
 
     print("📦 Loading Dataset...")
     train_loader, val_loader, _ = Dataloaders(

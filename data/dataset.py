@@ -5,13 +5,10 @@ def Dataloaders(dataset_in: str, batch_size: int, columns: list, shuffle: bool):
     """
     Loads dataset and returns PyTorch dataloaders.
     """
-    print("---------Starting Data Step!----------")
-    print(f"-----Loading Dataset: {dataset_in} -----")
+    print(f"Loading Dataset: {dataset_in}")
 
     dataset = load_dataset(dataset_in, split=None)
     dataset = dataset.with_format("torch", columns=columns)
-
-    print("----------Creating Dataloaders----------")
 
     train_loader = DataLoader(dataset['train'], batch_size=batch_size, shuffle=shuffle)
 
@@ -21,6 +18,6 @@ def Dataloaders(dataset_in: str, batch_size: int, columns: list, shuffle: bool):
     test_loader = DataLoader(dataset['test'], batch_size=batch_size, shuffle=False) \
         if 'test' in dataset else None
 
-    print("----------Dataloaders Ready----------")
+    print("✅ Dataloaders Ready")
     return train_loader, val_loader, test_loader
 
