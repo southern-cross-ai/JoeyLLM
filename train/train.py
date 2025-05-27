@@ -6,107 +6,82 @@ from torch.optim.lr_scheduler import StepLR
 from tqdm import tqdm
 import wandb
 from datetime import datetime
-from omegaconf import DictConfig, OmegaConf
 
 
-class JoeyLLMTrainer:
-    """
-    Trainer class for training JoeyLLM models using PyTorch with support for:
-    - Single GPU training
-    - Gradient accumulation
-    - Checkpoint saving and resuming
-    - Learning rate scheduling
-    - WandB experiment tracking
-    """
-
-    def __init__(self, cfg, model, train_loader, val_loader=None):
-        """
-        Initializes training environment.
-
-        Args:
-            cfg (DictConfig): Configuration object loaded via Hydra.
-            model (nn.Module): JoeyLLM model instance.
-            train_loader (DataLoader): DataLoader for training set.
-            val_loader (DataLoader, optional): DataLoader for validation set.
-        """
-        self.cfg = cfg
+class OneGPUTrainer:
+    def __init__(
+        self,
+        model: nn.Module,
+        train_loader,
+        val_loader=None,
+        *,
+        device=None,
+        learning_rate=1e-4,
+        weight_decay=0.01,
+        gradient_accumulation_steps=1,
+        epochs=10,
+        checkpoint_path="./checkpoints",
+        resume_from=None,
+        save_every=1,
+        use_wandb=False,
+        wandb_project=None,
+        wandb_config=None
+    ):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
-
-        # Determine device
-        self.device = torch.device(cfg.train.device if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(device if device else ("cuda" if torch.cuda.is_available() else "cpu"))
         print(f"Using device: {self.device}")
-        self.model = self.model.to(self.device)
 
-        # Optimizer and scheduler
+        self.model = self.model.to(self.device)
+        self.epochs = epochs
+        self.checkpoint_path = checkpoint_path
+        self.resume_from = resume_from
+        self.save_every = save_every
+        self.gradient_accumulation_steps = gradient_accumulation_steps
+
         self.optimizer = optim.Adam(
             model.parameters(),
-            lr=cfg.train.learning_rate,
-            weight_decay=cfg.train.weight_decay
+            lr=learning_rate,
+            weight_decay=weight_decay
         )
         self.scheduler = StepLR(self.optimizer, step_size=5, gamma=0.5)
-
-        # Loss function: Cross-entropy over token logits
         self.criterion = nn.CrossEntropyLoss()
 
-        # Epoch and step counters
         self.epoch = 0
         self.step = 0
 
-        # Gradient accumulation setup
-        self.accum_steps = cfg.train.gradient_accumulation_steps
+        self.use_wandb = use_wandb
 
-        # WandB setup
-        self.use_wandb = cfg.train.wandb.log
-        if self.use_wandb:
-            wandb.init(
-                # project=cfg.train.wandb.project,
-                name=f"train-{datetime.now().strftime('%d%m%Y-%H%M%S')}",
-                config=OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
-            )
-            wandb.watch(model)
-
-        # Load from checkpoint if available
         self.load_checkpoint()
 
     def save_checkpoint(self):
-        """
-        Saves current model, optimizer, and scheduler states to a checkpoint file.
-        """
-        os.makedirs(self.cfg.train.checkpoint_path, exist_ok=True)
-
+        os.makedirs(self.checkpoint_path, exist_ok=True)
         checkpoint = {
             'epoch': self.epoch,
             'step': self.step,
             'model_state': self.model.state_dict(),
             'optimizer_state': self.optimizer.state_dict(),
-            'scheduler_state': self.scheduler.state_dict(),
-            'config': self.cfg
+            'scheduler_state': self.scheduler.state_dict()
         }
-
-        path = os.path.join(self.cfg.train.checkpoint_path, f"joeyllm_epoch_{self.epoch}.pt")
+        path = os.path.join(self.checkpoint_path, f"checkpoint_epoch_{self.epoch}.pt")
         torch.save(checkpoint, path)
         print(f"Saved checkpoint at epoch {self.epoch}")
 
     def load_checkpoint(self):
-        """
-        Loads latest checkpoint if one exists in the specified checkpoint directory.
-        Resumes model training from that checkpoint.
-        """
-        resume_path = self.cfg.train.resume_from or self.cfg.train.checkpoint_path
-        if not os.path.exists(resume_path):
+        path = self.resume_from or self.checkpoint_path
+        if not os.path.exists(path):
             return
 
         try:
-            checkpoints = [f for f in os.listdir(resume_path) if f.endswith(".pt")]
-            if not checkpoints:
-                return
+            if os.path.isdir(path):
+                checkpoints = [f for f in os.listdir(path) if f.endswith(".pt")]
+                if not checkpoints:
+                    return
+                latest = max(checkpoints, key=lambda x: int(x.split("_")[-1].split(".")[0]))
+                path = os.path.join(path, latest)
 
-            # Extract latest checkpoint by epoch number
-            latest = max(checkpoints, key=lambda x: int(x.split("_")[-1].split(".")[0]))
-            checkpoint = torch.load(os.path.join(resume_path, latest))
-
+            checkpoint = torch.load(path, map_location=self.device)
             self.model.load_state_dict(checkpoint['model_state'])
             self.optimizer.load_state_dict(checkpoint['optimizer_state'])
             self.scheduler.load_state_dict(checkpoint['scheduler_state'])
@@ -117,59 +92,42 @@ class JoeyLLMTrainer:
         except Exception as e:
             print(f"Error loading checkpoint: {e}")
 
-    def train_single_gpu(self):
-        """
-        Main training loop (for single gpu) over epochs and batches with:
-        - Gradient accumulation
-        - Periodic checkpoint saving
-        - Loss logging
-        """
-        for epoch in range(self.epoch, self.cfg.train.epochs):
+    def train(self):
+        for epoch in range(self.epoch, self.epochs):
             self.model.train()
             epoch_loss = 0.0
             self.epoch = epoch
 
-            # Progress bar setup
-            pbar = tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=f"Epoch {epoch+1}")
-
+            pbar = tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=f"Epoch {epoch + 1}")
             self.optimizer.zero_grad()
 
             for i, batch in pbar:
-                # Move inputs to the correct device
                 input_ids = batch["input_ids"].to(self.device)
-
                 outputs = self.model(input_ids[:, :-1])
                 targets = input_ids[:, 1:]
 
                 loss = self.criterion(
                     outputs.view(-1, outputs.size(-1)),
                     targets.reshape(-1)
-                )   
+                )
 
-
-                # Normalize loss by gradient accumulation steps
-                loss = loss / self.accum_steps
+                loss = loss / self.gradient_accumulation_steps
                 loss.backward()
                 epoch_loss += loss.item()
                 self.step += 1
 
-                # Perform optimizer step after accumulating gradients
-                if (i + 1) % self.accum_steps == 0:
+                if (i + 1) % self.gradient_accumulation_steps == 0:
                     self.optimizer.step()
                     self.scheduler.step()
                     self.optimizer.zero_grad()
 
-                pbar.set_postfix(loss=loss.item() * self.accum_steps)
+                pbar.set_postfix(loss=loss.item() * self.gradient_accumulation_steps)
 
-                # Log to WandB
                 if self.use_wandb:
-                    wandb.log({"loss": loss.item() * self.accum_steps, "epoch": epoch})
+                    wandb.log({"loss": loss.item() * self.gradient_accumulation_steps, "epoch": epoch})
 
             print(f"Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
 
-            # Save checkpoint
-            if (epoch + 1) % self.cfg.train.save_every == 0:
+            if (epoch + 1) % self.save_every == 0:
                 self.save_checkpoint()
 
-        if self.use_wandb:
-            wandb.finish()

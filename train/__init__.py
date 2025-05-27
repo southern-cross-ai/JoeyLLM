@@ -1,1 +1,1 @@
-from .train import JoeyLLMTrainer
+from .train import OneGPUTrainer
