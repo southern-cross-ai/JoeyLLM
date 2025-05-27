@@ -5,7 +5,6 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 from tqdm import tqdm
 import wandb
-from datetime import datetime
 
 
 class OneGPUTrainer:
@@ -22,10 +21,7 @@ class OneGPUTrainer:
         epochs=10,
         checkpoint_path="./checkpoints",
         resume_from=None,
-        save_every=1,
-        use_wandb=False,
-        wandb_project=None,
-        wandb_config=None
+        save_every=1
     ):
         self.model = model
         self.train_loader = train_loader
@@ -51,22 +47,20 @@ class OneGPUTrainer:
         self.epoch = 0
         self.step = 0
 
-        self.use_wandb = use_wandb
-
         self.load_checkpoint()
 
     def save_checkpoint(self):
         os.makedirs(self.checkpoint_path, exist_ok=True)
         checkpoint = {
-            'epoch': self.epoch,
-            'step': self.step,
-            'model_state': self.model.state_dict(),
-            'optimizer_state': self.optimizer.state_dict(),
-            'scheduler_state': self.scheduler.state_dict()
+            "epoch": self.epoch,
+            "step": self.step,
+            "model_state": self.model.state_dict(),
+            "optimizer_state": self.optimizer.state_dict(),
+            "scheduler_state": self.scheduler.state_dict()
         }
         path = os.path.join(self.checkpoint_path, f"checkpoint_epoch_{self.epoch}.pt")
         torch.save(checkpoint, path)
-        print(f"Saved checkpoint at epoch {self.epoch}")
+        print(f"✅ Saved checkpoint at epoch {self.epoch}")
 
     def load_checkpoint(self):
         path = self.resume_from or self.checkpoint_path
@@ -81,16 +75,16 @@ class OneGPUTrainer:
                 latest = max(checkpoints, key=lambda x: int(x.split("_")[-1].split(".")[0]))
                 path = os.path.join(path, latest)
 
-            checkpoint = torch.load(path, map_location=self.device)
-            self.model.load_state_dict(checkpoint['model_state'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state'])
-            self.scheduler.load_state_dict(checkpoint['scheduler_state'])
-            self.epoch = checkpoint['epoch'] + 1
-            self.step = checkpoint['step']
+            checkpoint = torch.load(path, map_location=self.device, weights_only=False)
+            self.model.load_state_dict(checkpoint["model_state"])
+            self.optimizer.load_state_dict(checkpoint["optimizer_state"])
+            self.scheduler.load_state_dict(checkpoint["scheduler_state"])
+            self.epoch = checkpoint["epoch"] + 1
+            self.step = checkpoint["step"]
 
-            print(f"Resumed training from epoch {self.epoch}")
+            print(f"🔄 Resumed training from epoch {self.epoch}")
         except Exception as e:
-            print(f"Error loading checkpoint: {e}")
+            print(f"⚠️ Error loading checkpoint: {e}")
 
     def train(self):
         for epoch in range(self.epoch, self.epochs):
@@ -98,7 +92,11 @@ class OneGPUTrainer:
             epoch_loss = 0.0
             self.epoch = epoch
 
-            pbar = tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=f"Epoch {epoch + 1}")
+            pbar = tqdm(
+                enumerate(self.train_loader),
+                total=len(self.train_loader),
+                desc=f"Epoch {epoch + 1}"
+            )
             self.optimizer.zero_grad()
 
             for i, batch in pbar:
@@ -110,7 +108,6 @@ class OneGPUTrainer:
                     outputs.view(-1, outputs.size(-1)),
                     targets.reshape(-1)
                 )
-
                 loss = loss / self.gradient_accumulation_steps
                 loss.backward()
                 epoch_loss += loss.item()
@@ -121,13 +118,16 @@ class OneGPUTrainer:
                     self.scheduler.step()
                     self.optimizer.zero_grad()
 
-                pbar.set_postfix(loss=loss.item() * self.gradient_accumulation_steps)
+                pbar.set_postfix(
+                    loss=loss.item() * self.gradient_accumulation_steps
+                )
 
-                if self.use_wandb:
-                    wandb.log({"loss": loss.item() * self.gradient_accumulation_steps, "epoch": epoch})
+                wandb.log({
+                    "loss": loss.item() * self.gradient_accumulation_steps,
+                    "epoch": epoch
+                })
 
-            print(f"Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
+            print(f"📉 Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
 
             if (epoch + 1) % self.save_every == 0:
                 self.save_checkpoint()
-

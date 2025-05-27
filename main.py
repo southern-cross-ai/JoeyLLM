@@ -49,7 +49,6 @@ def main(cfg: DictConfig):
         checkpoint_path=cfg.train.checkpoint_path,
         resume_from=cfg.train.resume_from,
         save_every=cfg.train.save_every,
-        use_wandb=cfg.train.wandb.log
     )
     
     trainer.train()
