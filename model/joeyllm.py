@@ -38,6 +38,12 @@ class JoeyLLM(nn.Module):
         self.position_embedding = nn.Parameter(torch.zeros(1, max_seq_len, embed_dim))
         nn.init.trunc_normal_(self.position_embedding, std=0.02)
 
+        # Precompute causal mask for maximum sequence length
+        causal_mask = torch.triu(torch.ones(max_seq_len, max_seq_len), diagonal=1)
+        causal_mask = causal_mask.masked_fill(causal_mask == 1, float('-inf'))
+        self.register_buffer("causal_mask", causal_mask)
+
+
         # Stack of GPT blocks
         self.blocks = nn.ModuleList([
             GPTBlock(embed_dim, num_heads, dropout)
@@ -57,8 +63,7 @@ class JoeyLLM(nn.Module):
         x = token_emb + position_emb                        # (B, T, D)
 
         # Causal mask for left-to-right attention
-        mask = torch.triu(torch.ones(T, T, device=input_ids.device), diagonal=1)
-        mask = mask.masked_fill(mask == 1, float('-inf'))  # shape: (T, T)
+        mask = self.causal_mask[:T, :T]  # Use only relevant slice
 
         # Forward through transformer blocks
         for block in self.blocks:
