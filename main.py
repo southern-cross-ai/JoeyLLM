@@ -11,13 +11,13 @@ def main(cfg: DictConfig):
     print("✅ Loaded Config:")
     print(OmegaConf.to_yaml(cfg))
 
-    if cfg.train.wandb.log:
+    if cfg.WandB.log:
         wandb.init(
-            project=cfg.train.wandb.get("project", "default_project"),
+            project=cfg.WandB.project,
             name=f"train-{wandb.util.generate_id()}",
             config=OmegaConf.to_container(cfg, resolve=True)
         )
-
+    
     print("📦 Loading Dataset...")
     train_loader, val_loader, _ = Dataloaders(
         cfg.data.dataset_in,

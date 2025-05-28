@@ -2,5 +2,6 @@ defaults:
   - model: joey_12
   - data: gutenberg_au
   - train: 1GPU
+  - WandB: 1GPU
   - _self_
 
