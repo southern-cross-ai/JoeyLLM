@@ -10,7 +10,6 @@ This is not a fine-tuned version of an overseas model. JoeyLLM is **foundational
 
 Today’s AI models are overwhelmingly developed offshore, trained on global data that doesn’t reflect Australian context, needs, or sovereignty. JoeyLLM is designed to change that.
 
-- ✅ **Culturally Aligned** – Incorporates Australian English, Indigenous languages, regional expressions, and public-domain Australian knowledge  
 - ✅ **Open Source** – Transparent, auditable, and permissively licensed  
 - ✅ **Trusted Infrastructure** – Built with a focus on safety, integrity, and national interest  
 
