@@ -37,6 +37,8 @@ class JoeyLLM(nn.Module):
         self.token_embedding = nn.Embedding(vocab_size, embed_dim)
         self.position_embedding = nn.Parameter(torch.zeros(1, max_seq_len, embed_dim))
         nn.init.trunc_normal_(self.position_embedding, std=0.02)
+        self.embedding_dropout = nn.Dropout(dropout)
+
 
         # Precompute causal mask for maximum sequence length
         causal_mask = torch.triu(torch.ones(max_seq_len, max_seq_len), diagonal=1)
@@ -61,6 +63,7 @@ class JoeyLLM(nn.Module):
         token_emb = self.token_embedding(input_ids)         # (B, T, D)
         position_emb = self.position_embedding[:, :T, :]    # (1, T, D)
         x = token_emb + position_emb                        # (B, T, D)
+        x = self.embedding_dropout(x)
 
         # Causal mask for left-to-right attention
         mask = self.causal_mask[:T, :T]  # Use only relevant slice
