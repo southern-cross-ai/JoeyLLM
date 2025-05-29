@@ -17,7 +17,7 @@ def main(cfg: DictConfig):
             name=f"train-{wandb.util.generate_id()}",
             config=OmegaConf.to_container(cfg, resolve=True)
         )
-    
+
     print("📦 Loading Dataset...")
     train_loader, val_loader, _ = Dataloaders(
         cfg.data.dataset_in,
@@ -35,7 +35,10 @@ def main(cfg: DictConfig):
         num_heads=cfg.model.num_heads,
         dropout=cfg.model.dropout,
     )
-
+    
+    if cfg.WandB.log:
+        wandb.watch(model)
+    
     print("🚀 Launching Trainer...")
     trainer = OneGPUTrainer(
         model=model,
