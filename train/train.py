@@ -108,9 +108,10 @@ class OneGPUTrainer:
                     outputs.view(-1, outputs.size(-1)),
                     targets.reshape(-1)
                 )
+                true_loss = loss.item()
                 loss = loss / self.gradient_accumulation_steps
                 loss.backward()
-                epoch_loss += loss.item()
+                epoch_loss += true_loss 
                 self.step += 1
 
                 if (i + 1) % self.gradient_accumulation_steps == 0:
@@ -118,11 +119,11 @@ class OneGPUTrainer:
                     self.optimizer.zero_grad()
 
                 pbar.set_postfix(
-                    loss=loss.item() * self.gradient_accumulation_steps
+                    loss=true_loss 
                 )
 
                 wandb.log({
-                    "loss": loss.item() * self.gradient_accumulation_steps,
+                    "loss": true_loss,
                     "epoch": epoch
                 })
 
