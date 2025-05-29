@@ -18,6 +18,7 @@ class OneGPUTrainer:
         learning_rate=1e-4,
         weight_decay=0.01,
         gradient_accumulation_steps=1,
+        gradient_clip_norm=1.0,
         epochs=10,
         checkpoint_path="./checkpoints",
         resume_from=None,
@@ -35,6 +36,7 @@ class OneGPUTrainer:
         self.resume_from = resume_from
         self.save_every = save_every
         self.gradient_accumulation_steps = gradient_accumulation_steps
+        self.gradient_clip_norm = gradient_clip_norm
 
         self.optimizer = optim.Adam(
             model.parameters(),
@@ -111,6 +113,7 @@ class OneGPUTrainer:
                 true_loss = loss.item()
                 loss = loss / self.gradient_accumulation_steps
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=self.gradient_clip_norm)
                 epoch_loss += true_loss 
                 self.step += 1
 

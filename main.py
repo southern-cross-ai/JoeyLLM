@@ -45,6 +45,7 @@ def main(cfg: DictConfig):
         learning_rate=cfg.train.learning_rate,
         weight_decay=cfg.train.weight_decay,
         gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,
+        gradient_clip_norm=cfg.train.gradient_clip_norm,
         epochs=cfg.train.epochs,
         checkpoint_path=cfg.train.checkpoint_path,
         resume_from=cfg.train.resume_from,

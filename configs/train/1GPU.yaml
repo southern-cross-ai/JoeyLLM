@@ -7,3 +7,5 @@ save_every: 2  # Save every N epochs
 resume_from: null  # Path to resume checkpoint or null
 gradient_accumulation_steps: 4
 checkpoint_path: "checkpoints"
+gradient_clip_norm: 1.0
+
