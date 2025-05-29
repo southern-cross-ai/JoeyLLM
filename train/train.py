@@ -78,7 +78,7 @@ class OneGPUTrainer:
                 path = os.path.join(path, latest)
 
             checkpoint = torch.load(path, map_location=self.device, weights_only=False)
-            self.model.load_state_dict(checkpoint["model_state"])
+            self.model.load_state_dict(checkpoint["model_state"], strict=False)
             self.optimizer.load_state_dict(checkpoint["optimizer_state"])
             self.scheduler.load_state_dict(checkpoint["scheduler_state"])
             self.epoch = checkpoint["epoch"] + 1
