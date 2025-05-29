@@ -115,7 +115,6 @@ class OneGPUTrainer:
 
                 if (i + 1) % self.gradient_accumulation_steps == 0:
                     self.optimizer.step()
-                    self.scheduler.step()
                     self.optimizer.zero_grad()
 
                 pbar.set_postfix(
@@ -131,3 +130,6 @@ class OneGPUTrainer:
 
             if (epoch + 1) % self.save_every == 0:
                 self.save_checkpoint()
+            
+            self.scheduler.step()
+                
