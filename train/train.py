@@ -88,6 +88,37 @@ class OneGPUTrainer:
         except Exception as e:
             print(f"⚠️ Error loading checkpoint: {e}")
 
+
+        def validate(self):
+        if self.val_loader is None:
+            return
+        self.model.eval()
+        total_val_loss = 0.0
+
+        with torch.no_grad():
+            val_pbar = tqdm(
+                self.val_loader,
+                desc="🔍 Validation"
+            )
+            for batch in val_pbar:
+                input_ids = batch["input_ids"].to(self.device)
+                outputs = self.model(input_ids[:, :-1])
+                targets = input_ids[:, 1:]
+
+                loss = self.criterion(
+                    outputs.view(-1, outputs.size(-1)),
+                    targets.reshape(-1)
+                )
+
+                total_val_loss += loss.item()
+        avg_val_loss = total_val_loss / len(self.val_loader)
+        print(f"🔍 Validation Loss: {avg_val_loss:.4f}")
+        wandb.log({
+            "val_loss": avg_val_loss,
+            "epoch": self.epoch
+        })
+
+
     def train(self):
         for epoch in range(self.epoch, self.epochs):
             self.model.train()
@@ -131,6 +162,9 @@ class OneGPUTrainer:
                 })
 
             print(f"📉 Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
+
+            self.validate()
+
 
             if (epoch + 1) % self.save_every == 0:
                 self.save_checkpoint()
