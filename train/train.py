@@ -89,7 +89,7 @@ class OneGPUTrainer:
             print(f"⚠️ Error loading checkpoint: {e}")
 
 
-        def validate(self):
+    def validate(self):
         if self.val_loader is None:
             return
         self.model.eval()
