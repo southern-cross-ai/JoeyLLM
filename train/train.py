@@ -158,7 +158,8 @@ class OneGPUTrainer:
 
                 wandb.log({
                     "loss": true_loss,
-                    "epoch": epoch
+                    "epoch": self.epoch
+
                 })
 
             print(f"📉 Epoch {epoch + 1} Loss: {epoch_loss:.4f}")
