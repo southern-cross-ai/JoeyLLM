@@ -35,7 +35,7 @@ def main(cfg: DictConfig):
         dropout=cfg.model.dropout,
     )
     
-    wandb.watch(model)
+    wandb.watch(model, log="all", log_freq=10)
     
     print("🚀 Launching Trainer...")
     trainer = OneGPUTrainer(
