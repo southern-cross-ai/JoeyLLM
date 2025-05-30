@@ -2,6 +2,6 @@ name: "Joeyllm"
 vocab_size: 100256 # Changed from 50257 as the dataset likely contains token IDs greater than that. 
 max_seq_len: 512 # Changed from 64 to 512 to match the dataset.
 embed_dim: 768
-num_heads: 4 # Changed from 8 to 4 to reduce the number of attention heads for testing.
-num_layers: 2 # Changed from 4 to 2 to reduce the number of layers for testing.
+num_heads: 12 # Changed from 8 to 4 to reduce the number of attention heads for testing.
+num_layers: 12 # Changed from 4 to 2 to reduce the number of layers for testing.
 dropout: 0.1
