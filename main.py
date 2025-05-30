@@ -42,7 +42,6 @@ def main(cfg: DictConfig):
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
-        device=cfg.train.device,
         learning_rate=cfg.train.learning_rate,
         weight_decay=cfg.train.weight_decay,
         gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,

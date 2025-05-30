@@ -27,9 +27,8 @@ class OneGPUTrainer:
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
-        self.device = torch.device(device if device else ("cuda" if torch.cuda.is_available() else "cpu"))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
-
         self.model = self.model.to(self.device)
         self.epochs = epochs
         self.checkpoint_path = checkpoint_path
@@ -77,7 +76,8 @@ class OneGPUTrainer:
                 latest = max(checkpoints, key=lambda x: int(x.split("_")[-1].split(".")[0]))
                 path = os.path.join(path, latest)
 
-            checkpoint = torch.load(path, map_location=self.device, weights_only=False)
+            checkpoint = torch.load(path, map_location=self.device)
+
             self.model.load_state_dict(checkpoint["model_state"], strict=False)
             self.optimizer.load_state_dict(checkpoint["optimizer_state"])
             self.scheduler.load_state_dict(checkpoint["scheduler_state"])
@@ -113,7 +113,6 @@ class OneGPUTrainer:
                 total_val_loss += loss.item()
         avg_val_loss = total_val_loss / len(self.val_loader)
         print(f"🔍 Validation Loss: {avg_val_loss:.4f}")
-        
         wandb.log({
             "val_loss": avg_val_loss,
             "epoch": self.epoch
