@@ -113,6 +113,7 @@ class OneGPUTrainer:
                 total_val_loss += loss.item()
         avg_val_loss = total_val_loss / len(self.val_loader)
         print(f"🔍 Validation Loss: {avg_val_loss:.4f}")
+        
         wandb.log({
             "val_loss": avg_val_loss,
             "epoch": self.epoch

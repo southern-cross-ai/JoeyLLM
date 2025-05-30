@@ -9,14 +9,13 @@ from train import OneGPUTrainer
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
     print("✅ Loaded Config:")
-    print(OmegaConf.to_yaml(cfg))
 
-    if cfg.WandB.log:
-        wandb.init(
-            project=cfg.WandB.project,
-            name=f"train-{wandb.util.generate_id()}",
-            config=OmegaConf.to_container(cfg, resolve=True)
-        )
+    
+    wandb.init(
+        project=cfg.WandB.project,
+        name=f"train-{wandb.util.generate_id()}",
+        config=OmegaConf.to_container(cfg, resolve=True)
+    )
 
     print("📦 Loading Dataset...")
     train_loader, val_loader, _ = Dataloaders(
@@ -36,8 +35,7 @@ def main(cfg: DictConfig):
         dropout=cfg.model.dropout,
     )
     
-    if cfg.WandB.log:
-        wandb.watch(model)
+    wandb.watch(model)
     
     print("🚀 Launching Trainer...")
     trainer = OneGPUTrainer(
@@ -57,8 +55,7 @@ def main(cfg: DictConfig):
     
     trainer.train()
 
-    if cfg.train.wandb.log:
-        wandb.finish()
+    wandb.finish()
 
     print("✅ Training Done!")
 
