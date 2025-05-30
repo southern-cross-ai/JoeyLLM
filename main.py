@@ -47,12 +47,12 @@ def main(cfg: DictConfig):
         gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,
         gradient_clip_norm=cfg.train.gradient_clip_norm,
         epochs=cfg.train.epochs,
-        checkpoint_path=cfg.train.checkpoint_path,
-        resume_from=cfg.train.resume_from,
-        save_every=cfg.train.save_every,
+        # checkpoint_path=cfg.train.checkpoint_path,
+        # resume_from=cfg.train.resume_from,
+        # save_every=cfg.train.save_every,
     )
     
-    trainer.train()
+    trainer.fit()
 
     wandb.finish()
 
