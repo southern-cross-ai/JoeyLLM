@@ -2,12 +2,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.amp import autocast, GradScaler
-from torch.optim.lr_scheduler import StepLR, LambdaLR
+from torch.optim.lr_scheduler import StepLR
 from tqdm import tqdm
 import wandb
 
 class OneGPUTrainer:
-    def __init__(self, model: nn.Module, train_loader, val_loader=None, *, device=None, learning_rate=1e-4, weight_decay=0.01, gradient_accumulation_steps=1, gradient_clip_norm=1.0, epochs=10, warmup_steps=500, save_every=1):
+    def __init__(self, model: nn.Module, train_loader, val_loader=None, *, device=None, learning_rate=1e-4, weight_decay=0.01, gradient_accumulation_steps=1, gradient_clip_norm=1.0, epochs=10, save_every=1):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -18,15 +18,11 @@ class OneGPUTrainer:
         self.gradient_accumulation_steps = gradient_accumulation_steps
         self.gradient_clip_norm = gradient_clip_norm
         self.optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        self.scaler = GradScaler()
+        self.scaler = GradScaler(init_scale=512)
 
-        # Warmup scheduler: linear warmup for 'warmup_steps' steps
-        def lr_lambda(current_step):
-            if current_step < warmup_steps:
-                return float(current_step) / float(max(1, warmup_steps))
-            return 1.0
+        # Remove warmup, use a standard scheduler instead (StepLR as example)
+        self.scheduler = StepLR(self.optimizer, step_size=1000, gamma=0.9)
 
-        self.scheduler = LambdaLR(self.optimizer, lr_lambda)
         self.criterion = nn.CrossEntropyLoss()
 
         self.epoch = 0
@@ -43,13 +39,13 @@ class OneGPUTrainer:
         for i, batch in pbar:
             input_ids = batch["input_ids"].to(self.device)
 
-            with autocast():
+            with autocast(device_type="cuda"):
                 outputs = self.model(input_ids[:, :-1])
                 targets = input_ids[:, 1:]
                 loss = self.criterion(outputs.view(-1, outputs.size(-1)), targets.reshape(-1))
                 true_loss = loss.item()
                 loss = loss / self.gradient_accumulation_steps
-            
+
             self.scaler.scale(loss).backward()
             epoch_loss += true_loss
             self.step += 1
