@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.cuda.amp import autocast, GradScaler
 from torch.optim.lr_scheduler import StepLR, LambdaLR
 from tqdm import tqdm
 import wandb
@@ -17,8 +18,7 @@ class OneGPUTrainer:
         self.gradient_accumulation_steps = gradient_accumulation_steps
         self.gradient_clip_norm = gradient_clip_norm
         self.optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-
-        print(f"Using device: {self.device}")
+        self.scaler = GradScaler()
 
         # Warmup scheduler: linear warmup for 'warmup_steps' steps
         def lr_lambda(current_step):
@@ -32,6 +32,8 @@ class OneGPUTrainer:
         self.epoch = 0
         self.step = 0
 
+        print(f"Using device: {self.device}")
+
     def train(self, epoch):
         self.model.train()
         epoch_loss = 0.0
@@ -40,19 +42,23 @@ class OneGPUTrainer:
 
         for i, batch in pbar:
             input_ids = batch["input_ids"].to(self.device)
-            outputs = self.model(input_ids[:, :-1])
-            targets = input_ids[:, 1:]
-            loss = self.criterion(outputs.view(-1, outputs.size(-1)), targets.reshape(-1))
-            true_loss = loss.item()
-            loss = loss / self.gradient_accumulation_steps
-            loss.backward()
+
+            with autocast():
+                outputs = self.model(input_ids[:, :-1])
+                targets = input_ids[:, 1:]
+                loss = self.criterion(outputs.view(-1, outputs.size(-1)), targets.reshape(-1))
+                true_loss = loss.item()
+                loss = loss / self.gradient_accumulation_steps
+            
+            self.scaler.scale(loss).backward()
             epoch_loss += true_loss
             self.step += 1
 
             if (i + 1) % self.gradient_accumulation_steps == 0:
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=self.gradient_clip_norm)
-                self.optimizer.step()
+                self.scaler.step(self.optimizer)
                 self.scheduler.step()
+                self.scaler.update()
                 self.optimizer.zero_grad()
 
             pbar.set_postfix(loss=true_loss)
