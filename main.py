@@ -6,6 +6,7 @@ from model import JoeyLLM
 from data import Dataloaders
 from utils.logger import WandBLogger
 
+# this is for offline testing
 import os
 import wandb
 os.environ["WANDB_MODE"] = "offline"
@@ -31,20 +32,18 @@ def main(cfg: DictConfig):
         num_heads=cfg.model.num_heads,
         dropout=cfg.model.dropout,
     )
-
-    print("Script stopped no errors up to this point :) ")
-    sys.exit()
-    
     
     wandb.watch(model, log="all", log_freq=10)
     
     print("🚀 Launching Trainer...")
-    
 
-    wandb.finish()
+    logger.finish()
 
     print("✅ Training Done!")
 
+    print("Script stopped no errors up to this point :) ")
+    sys.exit()
+    
 
 if __name__ == "__main__":
     main()
