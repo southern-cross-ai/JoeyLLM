@@ -1,29 +1,31 @@
+import sys
+
 import hydra
 from omegaconf import DictConfig, OmegaConf
-import wandb
 from model import JoeyLLM
 from data import Dataloaders
-from train import OneGPUTrainer
+from utils.logger import WandBLogger
 
+import os
+import wandb
+os.environ["WANDB_MODE"] = "offline"
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
     print("✅ Loaded Config:")
 
-    
-    wandb.init(
-        project=cfg.WandB.project,
+
+    logger = WandBLogger(
+        project_name=cfg.WandB.project,
         name=f"train-{wandb.util.generate_id()}",
         config=OmegaConf.to_container(cfg, resolve=True)
     )
 
+    print("Script stopped no errors up to this point :) ")
+    sys.exit()
+
+
     print("📦 Loading Dataset...")
-    train_loader, val_loader, _ = Dataloaders(
-        cfg.data.dataset_in,
-        cfg.data.batch_size,
-        cfg.data.columns,
-        cfg.data.shuffle,
-    )
 
     print("🧠 Initializing Model...")
     model = JoeyLLM(
@@ -38,21 +40,7 @@ def main(cfg: DictConfig):
     wandb.watch(model, log="all", log_freq=10)
     
     print("🚀 Launching Trainer...")
-    trainer = OneGPUTrainer(
-        model=model,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        learning_rate=cfg.train.learning_rate,
-        weight_decay=cfg.train.weight_decay,
-        gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,
-        gradient_clip_norm=cfg.train.gradient_clip_norm,
-        epochs=cfg.train.epochs,
-        # checkpoint_path=cfg.train.checkpoint_path,
-        # resume_from=cfg.train.resume_from,
-        # save_every=cfg.train.save_every,
-    )
     
-    trainer.fit()
 
     wandb.finish()
 
