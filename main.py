@@ -14,16 +14,11 @@ os.environ["WANDB_MODE"] = "offline"
 def main(cfg: DictConfig):
     print("✅ Loaded Config:")
 
-
     logger = WandBLogger(
         project_name=cfg.WandB.project,
         name=f"train-{wandb.util.generate_id()}",
         config=OmegaConf.to_container(cfg, resolve=True)
     )
-
-    print("Script stopped no errors up to this point :) ")
-    sys.exit()
-
 
     print("📦 Loading Dataset...")
 
@@ -36,6 +31,10 @@ def main(cfg: DictConfig):
         num_heads=cfg.model.num_heads,
         dropout=cfg.model.dropout,
     )
+
+    print("Script stopped no errors up to this point :) ")
+    sys.exit()
+    
     
     wandb.watch(model, log="all", log_freq=10)
     

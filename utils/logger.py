@@ -1,13 +1,13 @@
 import wandb
 
 class WandBLogger:
-    def __init__(self, project_name, config=None):
+    def __init__(self, project_name, name=None, config=None):
         """
         Initialize the W&B logger.
         :param project_name: Name of the W&B project.
         :param config: Optional dict for experiment config (like LR, batch size, etc.).
         """
-        wandb.init(project=project_name, config=config)
+        wandb.init(project=project_name, name=name, config=config)
 
     def log_message(self, message):
         """

@@ -2,17 +2,18 @@ import torch
 from torch.cuda.amp import autocast, GradScaler
 
 class Trainer:
-  '''
-✅ Modular Trainer:
-fit() – Runs full training + validation loop
-_train_epoch() – One training pass (internal)
-_validate_epoch() – One validation pass (internal)
+    '''
+    ✅ Modular Trainer:
+    fit() – Runs full training + validation loop
+    _train_epoch() – One training pass (internal)
+    _validate_epoch() – One validation pass (internal)
 
-Early stopping & checkpointing built-in
-✅ Mixed precision (AMP) with torch.cuda.amp
-✅ Logger support – easy to integrate with W&B, MLflow, etc.
-✅ Flexible – swap datasets, models, optimizers with minimal changes!
-'''
+    Early stopping & checkpointing built-in
+    ✅ Mixed precision (AMP) with torch.cuda.amp
+    ✅ Logger support – easy to integrate with W&B, MLflow, etc.
+    ✅ Flexible – swap datasets, models, optimizers with minimal changes!
+    '''
+
     def __init__(self, model, dataloader, val_dataloader, optimizer, scheduler=None, logger=None, device="cuda"):
         self.model = model.to(device)
         self.dataloader = dataloader
