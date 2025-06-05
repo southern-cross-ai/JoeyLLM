@@ -22,27 +22,19 @@ def main(cfg: DictConfig):
         config=OmegaConf.to_container(cfg, resolve=True)
     )
 
-    # Config
-    data_path = "sample/10BT"
-    chunk_size = 512
-    buffer_text_size = 1000
-    batch_size = 32
-    num_workers = 8
-
     print("📦 Loading Dataset...")
     dataloader = get_dataloader(
-        data_path=data_path,
-        chunk_size=chunk_size,
-        buffer_text_size=buffer_text_size,
-        batch_size=batch_size,
-        num_workers=num_workers
+        data_path=cfg.data.data_path,
+        chunk_size=cfg.data.chunk_size,
+        buffer_text_size=cfg.data.buffer_text_size,
+        batch_size=cfg.data.batch_size,
+        num_workers=cfg.data.num_workers
     )
-
+    # Testing dataloader
     # for batch in dataloader:
     #     print("✅ Got batch with shape:", batch.shape)
     #     break
     
-
     print("🧠 Initializing Model...")
     model = JoeyLLM(
         vocab_size=cfg.model.vocab_size,
@@ -57,6 +49,12 @@ def main(cfg: DictConfig):
     
     print("🚀 Launching Trainer...")
 
+    
+    
+    
+    
+    
+    
     logger.finish()
 
     print("✅ Training Done!")   
