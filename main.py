@@ -3,25 +3,45 @@ import sys
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from model import JoeyLLM
-from data import Dataloaders
-from utils.logger import WandBLogger
+from data import get_dataloader
+from utils.logger import wandbLogger
 
-# this is for offline testing
-import os
-import wandb
-os.environ["WANDB_MODE"] = "offline"
+# # this is for offline testing
+# import os
+# print("Script stopped no errors up to this point :) ")
+# sys.exit()
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
     print("✅ Loaded Config:")
 
-    logger = WandBLogger(
-        project_name=cfg.WandB.project,
-        name=f"train-{wandb.util.generate_id()}",
+    wandbLogger.set_mode(cfg.wandb.mode)
+
+    logger = wandbLogger(
+        project_name=cfg.wandb.project,
         config=OmegaConf.to_container(cfg, resolve=True)
     )
 
+    # Config
+    data_path = "sample/10BT"
+    chunk_size = 512
+    buffer_text_size = 1000
+    batch_size = 32
+    num_workers = 8
+
     print("📦 Loading Dataset...")
+    dataloader = get_dataloader(
+        data_path=data_path,
+        chunk_size=chunk_size,
+        buffer_text_size=buffer_text_size,
+        batch_size=batch_size,
+        num_workers=num_workers
+    )
+
+    # for batch in dataloader:
+    #     print("✅ Got batch with shape:", batch.shape)
+    #     break
+    
 
     print("🧠 Initializing Model...")
     model = JoeyLLM(
@@ -33,17 +53,13 @@ def main(cfg: DictConfig):
         dropout=cfg.model.dropout,
     )
     
-    wandb.watch(model, log="all", log_freq=10)
+    logger.watch_model(model, log="all", log_freq=10)
     
     print("🚀 Launching Trainer...")
 
     logger.finish()
 
-    print("✅ Training Done!")
-
-    print("Script stopped no errors up to this point :) ")
-    sys.exit()
-    
+    print("✅ Training Done!")   
 
 if __name__ == "__main__":
     main()

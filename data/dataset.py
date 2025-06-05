@@ -1,23 +1,68 @@
+import torch
+from torch.utils.data import IterableDataset, DataLoader
 from datasets import load_dataset
-from torch.utils.data import DataLoader
+import tiktoken
 
-def Dataloaders(dataset_in: str, batch_size: int, columns: list, shuffle: bool):
-    """
-    Loads dataset and returns PyTorch dataloaders.
-    """
-    print(f"Loading Dataset: {dataset_in}")
 
-    dataset = load_dataset(dataset_in, split=None)
-    dataset = dataset.with_format("torch", columns=columns)
+class BufferedStreamTokenChunkDataset(IterableDataset):
+    def __init__(self, hf_streaming_dataset, tokenizer, chunk_size, buffer_text_size):
+        self.dataset = hf_streaming_dataset
+        self.tokenizer = tokenizer
+        self.chunk_size = chunk_size
+        self.buffer_text_size = buffer_text_size
 
-    train_loader = DataLoader(dataset['train'], batch_size=batch_size, shuffle=shuffle)
+    def __iter__(self):
+        buffer = []
+        token_buffer = []
 
-    val_loader = DataLoader(dataset['validation'], batch_size=batch_size, shuffle=False) \
-        if 'validation' in dataset else None
+        for example in self.dataset:
+            buffer.append(example["text"])
+            if len(buffer) >= self.buffer_text_size:
+                tokenized = self.tokenizer.encode(
+                    " ".join(buffer),
+                    allowed_special=self.tokenizer.special_tokens_set
+                )
+                token_buffer.extend(tokenized)
+                buffer = []
 
-    test_loader = DataLoader(dataset['test'], batch_size=batch_size, shuffle=False) \
-        if 'test' in dataset else None
+                while len(token_buffer) >= self.chunk_size:
+                    yield torch.tensor(token_buffer[:self.chunk_size], dtype=torch.long)
+                    token_buffer = token_buffer[self.chunk_size:]
 
-    print("✅ Dataloaders Ready")
-    return train_loader, val_loader, test_loader
+        if buffer:
+            tokenized = self.tokenizer.encode(
+                " ".join(buffer),
+                allowed_special=self.tokenizer.special_tokens_set
+            )
+            token_buffer.extend(tokenized)
 
+        while len(token_buffer) >= self.chunk_size:
+            yield torch.tensor(token_buffer[:self.chunk_size], dtype=torch.long)
+            token_buffer = token_buffer[self.chunk_size:]
+
+
+def get_dataloader(data_path, chunk_size, buffer_text_size, batch_size, num_workers):
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+
+    dataset = load_dataset(
+        "HuggingFaceFW/fineweb",
+        data_dir=data_path,
+        split="train",
+        streaming=True
+    )
+
+    token_dataset = BufferedStreamTokenChunkDataset(
+        hf_streaming_dataset=dataset,
+        tokenizer=tokenizer,
+        chunk_size=chunk_size,
+        buffer_text_size=buffer_text_size
+    )
+
+    dataloader = DataLoader(
+        token_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=True,
+    )
+
+    return dataloader
