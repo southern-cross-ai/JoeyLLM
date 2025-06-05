@@ -6,6 +6,11 @@ This is not a fine-tuned version of an overseas model. JoeyLLM is **foundational
 
 ---
 
+## What is an LLM ?
+Simple Explanation -  imagine you're talking to a really, really smart parrot that has read almost the entire internet. That's kind of what a large language model (LLM) is like - a computer program that has learned to understand and generate human language by studying a massive amount of text. When you talk to it, it tries to figure out what you mean based on what it has "read" before and then puts together a response that sounds like a human wrote it.
+
+Extended Explanation - a Large Language Model is a fundamentally complex statistical model built using neural network principles and trained on massive datasets to perform language-related tasks. It takes text as input and produces text as output. Think of the LLM as a function with a vast internal state (the parameters). The input text is like the arguments you pass to the function. The function then processes this input based on its learned internal state and returns an output string (the generated text). The training process is like a very long and complex optimization algorithm that tunes the internal state (parameters) of the function to perform the task of language generation effectively.
+
 ## 🇦🇺 Why JoeyLLM?
 
 Today’s AI models are overwhelmingly developed offshore, trained on global data that doesn’t reflect Australian context, needs, or sovereignty. JoeyLLM is designed to change that.
