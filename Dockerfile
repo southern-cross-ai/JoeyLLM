@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Update the system and install the necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    bash-completion \
     vim \
     git \
     wget \
