@@ -64,7 +64,7 @@ class Trainer:
             if inputs.dim() == 1:
                 inputs = inputs.unsqueeze(0)
 
-            print(f"⚠️  [DEBUG] inputs.shape = {inputs.shape}")
+            # print(f"⚠️  [DEBUG] inputs.shape = {inputs.shape}")
 
             self.optimizer.zero_grad()
 
@@ -79,17 +79,23 @@ class Trainer:
             total_loss += loss.item()
             progress_bar.set_postfix(loss=loss.item())
 
-            if batch_idx % 10 == 0:
-                msg = f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss.item():.4f}"
-                print(msg)
-                if self.logger:
-                    self.logger.log_message(msg)
-                    self.logger.log_metrics({
-                        "train_loss": loss.item()
-                    }, step=epoch * len(self.dataloader) + batch_idx)
 
-        avg_loss = total_loss / len(self.dataloader)
-        print(f"Epoch {epoch} | Avg Training Loss: {avg_loss:.4f}")
+            # logers and pbar
+            progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
+            progress_bar.set_postfix(loss=loss.item())
+            if self.logger:
+                self.logger.log_message(msg)
+                self.logger.log_metrics({
+                    "train_loss": loss.item()
+                }, step=epoch * len(self.dataloader) + batch_idx)
+
+        try:
+            avg_loss = total_loss / len(self.dataloader)
+        except TypeError:
+            avg_loss = total_loss / (batch_idx + 1)
+        
+        tqdm.write(f"✅ Epoch {epoch} | Avg Training Loss: {avg_loss:.4f}")
+        
         return avg_loss
 
     def save_checkpoint(self, path):

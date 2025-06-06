@@ -2,4 +2,4 @@ data_path: "sample/10BT"
 chunk_size: 512
 buffer_text_size: 1000
 batch_size: 32
-num_workers: 8
+num_workers: 4
