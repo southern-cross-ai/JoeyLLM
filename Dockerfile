@@ -1,34 +1,12 @@
-# Use Ubuntu 24.04 for stability
-FROM ubuntu:24.04
+# Start FROM your main runtime image
+FROM your-main-image
 
-# Set environment variable for non-interactive installation
-ENV DEBIAN_FRONTEND=noninteractive
+# Install code-server
+RUN curl -fsSL https://code-server.dev/install.sh | sh
 
-# Update the system and install the necessary packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    vim \
-    git \
-    wget \
-    curl \
-    htop \
-    nvtop \
-    python3 \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    openssh-client \
-    git-lfs \
-    && rm -rf /var/lib/apt/lists/*  
+# Optionally expose the code-server port
+EXPOSE 8443
 
-# Ensure 'python3' is recognised as 'python'
-RUN ln -sf /usr/bin/python3 /usr/bin/python
+# Default command to run code-server (optional)
+CMD ["code-server", "--bind-addr", "0.0.0.0:8443", "/workspace"]
 
-# Copy repo code into /src folder
-COPY . /src
-
-# Set default shell working directory to something *other than* /src
-WORKDIR /root
-
-# Default command (for interactive HPC usage)
-CMD ["/bin/bash"]
