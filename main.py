@@ -32,10 +32,6 @@ def main(cfg: DictConfig):
         batch_size=cfg.data.batch_size,
         num_workers=cfg.data.num_workers
     )
-    # Testing dataloader
-    for batch in dataloader:
-        print("✅ Got batch with shape:", batch.shape)
-        break
     
     print("🧠 Initializing Model...")
     model = JoeyLLM(
