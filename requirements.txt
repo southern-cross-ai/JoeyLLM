@@ -74,6 +74,7 @@ pydantic_core==2.14.5
 Pygments==2.19.1
 pytest==8.3.5
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
 pytz==2025.2
 PyYAML==6.0.2
 pyzmq==26.4.0
