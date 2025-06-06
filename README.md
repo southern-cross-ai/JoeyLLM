@@ -1,51 +1,24 @@
-# 🦘 JoeyLLM | Australia’s First Fair Dinkum AI Language Model  
+# 🧪 JoeyLLM Live Dev Container
 
-G'day, mate! 🏄‍♂️ Welcome to **JoeyLLM**, the **next-gen Aussie AI** that speaks your language – whether it's English, Aussie slang, or even a bit of Strayan bush poetry.  
+This repository is for **live testing and development** of the JoeyLLM container image.  
+It builds on the current **JoeyLLM base image** 🐳 and adds extra tools for interactive development, debugging, and experimentation.
 
-We’re on a mission to build **Australia’s first culturally and linguistically tailored large language model (LLM)**. Unlike your regular AI that doesn’t know the difference between a **bottle-o** and a **servo**, **JoeyLLM** will be trained on a rich dataset of Australian contexts, **including indigenous languages, regional slang, and local knowledge**.  
+## 🔧 Features
 
-By the end of this project, we want **JoeyLLM to be the Steve Irwin of AI – smart, culturally aware, and ready to take on the world!** 🐊  
+- 🧱 **Based on the latest JoeyLLM base image**  
+  Automatically pulls the most current version used in development.
 
----
+- 💻 **VS Code Server pre-installed**  
+  Access a full development environment directly in your browser.
 
-## 🌏 Why JoeyLLM?  
-Most AI models think "thongs" are flip-flops and that "football" means soccer. **Not on our watch!** 🚫⚽  
+- 🔐 **SSH port forwarding support**  
+  Connect securely and work as if you’re inside the container.
 
-✅ **Understands Aussie Culture** – Indigenous languages, regional dialects, and why we shorten every word.  
-✅ **Ethical AI** – No dodgy biases, just a fair go for all.  
-✅ **Open Source** – Because AI should be shared like a good backyard barbie.  
-✅ **Built for Australia** – Made for **industries, universities, and the community** (not just Silicon Valley).  
+- ⚡ **Live editing and real-time testing**  
+  Make changes without needing to rebuild the base image every time.
 
----
+## 🚀 Ideal for
 
-## 🚀 Project Goals  
-- Build a **scalable AI model** that doesn’t get confused when you say "Chuck a uey" 🛻  
-- Publish **open-source datasets and research** (because we’re not gatekeepers)  
-- Get **industry, academia, and everyday Aussies** involved in making AI actually useful Down Under  
-
----
-
-## 🏗️ Technical Foundation  
-JoeyLLM is powered by state-of-the-art transformer architectures, just like GPT, **but with more Vegemite**. 🥪  
-
-We focus on:  
-- **High-quality Australian datasets** (yes, that includes regional footy banter)  
-- **Fine-tuning for ethical AI** (we won’t teach it to call everything a "drop bear")  
-- **Making it smart enough to handle real Australian language and culture**  
-
-
----
-
-## 🤝 Get Involved  
-Reckon you’ve got what it takes to **help train an AI that knows the difference between "mate" and "maaate"?** Join us!  
-
-📢 **Join the Discussion**: [GitHub Discussions](#)  
-🛠️ **Contribute**: Check out our [Contributing Guide](#)  
-📄 **Read the Docs**: [Project Wiki](#)  
-
----
-
-## 📜 License  
-JoeyLLM is **open-source**, so feel free to **fork it, tweak it, and teach it more Aussie slang**.  
-
-🚀 *Let’s build the AI that even a kangaroo would be proud of!* 🇦🇺🐨 
+- Developers contributing to JoeyLLM  
+- Testing new features or configurations  
+- Debugging in a live, interactive container environment
