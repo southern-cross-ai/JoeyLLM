@@ -1,12 +1,28 @@
-# Start FROM your main runtime image
-FROM your-main-image
+# Extend from your main JoeyLLM image that already includes curl
+FROM southerncrossai/joeyllm
 
-# Install code-server
-RUN curl -fsSL https://code-server.dev/install.sh | sh
+# Set noninteractive mode
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Optionally expose the code-server port
-EXPOSE 8443
+# Install bash-completion and VS Code Server
+RUN apt-get update && \
+    apt-get install -y bash-completion && \
+    curl -fsSL https://code-server.dev/install.sh | sh -s -- --edge && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Default command to run code-server (optional)
-CMD ["code-server", "--bind-addr", "0.0.0.0:8443", "/workspace"]
+# Add vscode user (no sudo)
+RUN useradd -ms /bin/bash vscode
 
+# Create workspace directory and set permissions
+RUN mkdir -p /home/vscode/workspace && chown vscode:vscode /home/vscode/workspace
+
+# Switch to vscode user
+USER vscode
+WORKDIR /home/vscode
+
+# Expose the VS Code Server port
+EXPOSE 8080
+
+# Set default entry point and command
+ENTRYPOINT ["code-server"]
+CMD ["--bind-addr", "0.0.0.0:8080", "/home/vscode/workspace"]
