@@ -1,39 +1,74 @@
 import torch
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
+from tqdm import tqdm
+
 
 class Trainer:
-  '''
-✅ Modular Trainer:
-fit() – Runs full training + validation loop
-_train_epoch() – One training pass (internal)
-_validate_epoch() – One validation pass (internal)
+    '''
+    ✅ Modular Trainer (No validation):
+    fit() – Runs full training loop
+    _train_epoch() – One training pass (internal)
 
-Early stopping & checkpointing built-in
-✅ Mixed precision (AMP) with torch.cuda.amp
-✅ Logger support – easy to integrate with W&B, MLflow, etc.
-✅ Flexible – swap datasets, models, optimizers with minimal changes!
-'''
-    def __init__(self, model, dataloader, val_dataloader, optimizer, scheduler=None, logger=None, device="cuda"):
+    Features:
+    - Mixed precision (AMP) with torch.amp
+    - Checkpointing
+    - Logger support (W&B, etc.)
+    - tqdm progress bar
+    '''
+
+    def __init__(
+        self,
+        model,
+        dataloader,
+        optimizer,
+        scheduler=None,
+        logger=None,
+        device="cuda"
+    ):
         self.model = model.to(device)
         self.dataloader = dataloader
-        self.val_dataloader = val_dataloader
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.logger = logger
         self.device = device
-        self.scaler = GradScaler()
+        self.scaler = GradScaler(device="cuda")
+
+    def compute_loss(self, outputs, labels):
+        """
+        outputs: [B, T, vocab_size]
+        labels:  [B, T]
+        """
+        criterion = torch.nn.CrossEntropyLoss()
+        B, T, V = outputs.size()
+        outputs = outputs.view(B * T, V)    # [B*T, V]
+        labels = labels.view(B * T)         # [B*T]
+        return criterion(outputs, labels)
+
 
     def _train_epoch(self, epoch):
         self.model.train()
         total_loss = 0
 
-        for batch_idx, batch in enumerate(self.dataloader):
-            inputs = batch["inputs"].to(self.device)
-            labels = batch["labels"].to(self.device)
+        progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False)
+
+        for batch_idx, batch in enumerate(progress_bar):
+            # Handle dict or tuple batch format
+            if isinstance(batch, dict):
+                inputs = batch["inputs"].to(self.device)
+                labels = batch["labels"].to(self.device)
+            else:
+                inputs = batch[0].to(self.device)
+                labels = batch[1].to(self.device)
+
+            # Ensure shape is [B, T]
+            if inputs.dim() == 1:
+                inputs = inputs.unsqueeze(0)
+
+            # print(f"⚠️  [DEBUG] inputs.shape = {inputs.shape}")
 
             self.optimizer.zero_grad()
 
-            with autocast():
+            with autocast(device_type="cuda"):
                 outputs = self.model(inputs)
                 loss = self.compute_loss(outputs, labels)
 
@@ -42,63 +77,37 @@ Early stopping & checkpointing built-in
             self.scaler.update()
 
             total_loss += loss.item()
+            progress_bar.set_postfix(loss=loss.item())
 
-            if batch_idx % 10 == 0:
-                msg = f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss.item():.4f}"
-                print(msg)
-                if self.logger:
-                    self.logger.log_message(msg)
-                    self.logger.log_metrics({"train_loss": loss.item()}, step=epoch * len(self.dataloader) + batch_idx)
 
-        avg_loss = total_loss / len(self.dataloader)
-        print(f"Epoch {epoch} | Average Training Loss: {avg_loss:.4f}")
+            # logers and pbar
+            progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
+            progress_bar.set_postfix(loss=loss.item())
+            if self.logger:
+                self.logger.log_message(msg)
+                self.logger.log_metrics({
+                    "train_loss": loss.item()
+                }, step=epoch * len(self.dataloader) + batch_idx)
+
+        try:
+            avg_loss = total_loss / len(self.dataloader)
+        except TypeError:
+            avg_loss = total_loss / (batch_idx + 1)
+        
+        tqdm.write(f"✅ Epoch {epoch} | Avg Training Loss: {avg_loss:.4f}")
+        
         return avg_loss
-
-    def _validate_epoch(self, epoch):
-        self.model.eval()
-        total_val_loss = 0
-        correct = 0
-        total = 0
-
-        with torch.no_grad():
-            for batch in self.val_dataloader:
-                inputs = batch["inputs"].to(self.device)
-                labels = batch["labels"].to(self.device)
-
-                with autocast():
-                    outputs = self.model(inputs)
-                    loss = self.compute_loss(outputs, labels)
-
-                total_val_loss += loss.item()
-                preds = outputs.argmax(dim=1)
-                correct += (preds == labels).sum().item()
-                total += labels.size(0)
-
-        avg_val_loss = total_val_loss / len(self.val_dataloader)
-        accuracy = 100.0 * correct / total
-
-        msg = f"Epoch {epoch} | Validation Loss: {avg_val_loss:.4f} | Accuracy: {accuracy:.2f}%"
-        print(msg)
-        if self.logger:
-            self.logger.log_message(msg)
-            self.logger.log_metrics({"val_loss": avg_val_loss, "val_accuracy": accuracy}, step=epoch)
-
-        return avg_val_loss, accuracy
-
-    def compute_loss(self, outputs, labels):
-        criterion = torch.nn.CrossEntropyLoss()
-        return criterion(outputs, labels)
 
     def save_checkpoint(self, path):
         checkpoint = {
             "model_state": self.model.state_dict(),
             "optimizer_state": self.optimizer.state_dict(),
-            "scaler_state": self.scaler.state_dict(),
+            "scaler_state": self.scaler.state_dict()
         }
         if self.scheduler:
             checkpoint["scheduler_state"] = self.scheduler.state_dict()
         torch.save(checkpoint, path)
-        print(f"Checkpoint saved to {path}")
+        print(f"✅ Checkpoint saved to {path}")
 
     def load_checkpoint(self, path):
         checkpoint = torch.load(path)
@@ -107,28 +116,14 @@ Early stopping & checkpointing built-in
         self.scaler.load_state_dict(checkpoint["scaler_state"])
         if self.scheduler and "scheduler_state" in checkpoint:
             self.scheduler.load_state_dict(checkpoint["scheduler_state"])
-        print(f"Checkpoint loaded from {path}")
+        print(f"✅ Checkpoint loaded from {path}")
 
-    def fit(self, num_epochs=20, early_stopping=3, checkpoint_path="checkpoint.pth"):
-        best_val_loss = float("inf")
-        early_stopping_counter = 0
-
+    def fit(self, num_epochs=20, checkpoint_path="checkpoints/checkpoint.pth"):
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
-            val_loss, val_acc = self._validate_epoch(epoch)
-
-            # Early stopping
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                early_stopping_counter = 0
-                self.save_checkpoint(checkpoint_path)
-            else:
-                early_stopping_counter += 1
-                if early_stopping_counter >= early_stopping:
-                    print("Early stopping triggered!")
-                    break
+            self.save_checkpoint(checkpoint_path)
 
             if self.scheduler:
                 self.scheduler.step()
 
-        print("Training complete!")
+        print("🏁 Training complete!")
