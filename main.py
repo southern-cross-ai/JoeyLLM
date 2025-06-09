@@ -59,12 +59,6 @@ def main(cfg: DictConfig):
         device="cuda" if torch.cuda.is_available() else "cpu"
     )
 
-
-    # # this is for offline testing
-    # import os
-    # print("Script stopped no errors up to this point :) ")
-    # sys.exit()
-
     trainer.fit(
         num_epochs=1,
         checkpoint_path="checkpoints/checkpoint.pth"
