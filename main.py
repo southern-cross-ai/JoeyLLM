@@ -70,9 +70,11 @@ def main(cfg: DictConfig):
         checkpoint_path="checkpoints/checkpoint.pth"
     )
     
+    print("🏁 Training complete!")
+    
     logger.finish()
 
-    print("✅ Training Done!")   
+    print("✅ Done!")   
 
 if __name__ == "__main__":
     main()

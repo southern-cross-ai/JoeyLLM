@@ -4,17 +4,6 @@ from tqdm import tqdm
 
 
 class Trainer:
-    '''
-    ✅ Modular Trainer (No validation):
-    fit() – Runs full training loop
-    _train_epoch() – One training pass (internal)
-
-    Features:
-    - Mixed precision (AMP) with torch.amp
-    - Checkpointing
-    - Logger support (W&B, etc.)
-    - tqdm progress bar
-    '''
 
     def __init__(
         self,
@@ -52,19 +41,9 @@ class Trainer:
         progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False)
 
         for batch_idx, batch in enumerate(progress_bar):
-            # Handle dict or tuple batch format
-            if isinstance(batch, dict):
-                inputs = batch["inputs"].to(self.device)
-                labels = batch["labels"].to(self.device)
-            else:
-                inputs = batch[0].to(self.device)
-                labels = batch[1].to(self.device)
 
-            # Ensure shape is [B, T]
-            if inputs.dim() == 1:
-                inputs = inputs.unsqueeze(0)
-
-            # print(f"⚠️  [DEBUG] inputs.shape = {inputs.shape}")
+            inputs = batch["inputs"].to(self.device)
+            labels = batch["labels"].to(self.device)
 
             self.optimizer.zero_grad()
 
@@ -80,15 +59,18 @@ class Trainer:
             progress_bar.set_postfix(loss=loss.item())
 
 
-            # logers and pbar
+            #pbar
             progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
             progress_bar.set_postfix(loss=loss.item())
+            
+            # loger
             if self.logger:
                 self.logger.log_message(msg)
                 self.logger.log_metrics({
                     "train_loss": loss.item()
                 }, step=epoch * len(self.dataloader) + batch_idx)
-
+        
+        # fix or iterable dataloader
         try:
             avg_loss = total_loss / len(self.dataloader)
         except TypeError:
@@ -118,12 +100,10 @@ class Trainer:
             self.scheduler.load_state_dict(checkpoint["scheduler_state"])
         print(f"✅ Checkpoint loaded from {path}")
 
-    def fit(self, num_epochs=20, checkpoint_path="checkpoints/checkpoint.pth"):
+    def fit(self, num_epochs, checkpoint_path="checkpoints/checkpoint.pth"):
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
             self.save_checkpoint(checkpoint_path)
 
             if self.scheduler:
                 self.scheduler.step()
-
-        print("🏁 Training complete!")
