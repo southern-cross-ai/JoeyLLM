@@ -1,10 +1,12 @@
+import os
 import hydra
 import torch
 from omegaconf import DictConfig, OmegaConf
 from model import JoeyLLM
 from data import get_dataloader
 from utils.logger import wandbLogger
-from train.trainer import  Trainer
+from train.trainer import Trainer
+import torch.distributed as dist
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
