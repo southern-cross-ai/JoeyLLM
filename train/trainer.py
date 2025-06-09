@@ -1,5 +1,5 @@
 import torch
-from torch.amp import autocast, GradScaler
+from torch.cuda.amp import autocast, GradScaler
 from tqdm import tqdm
 import os
 import re
@@ -22,7 +22,7 @@ class Trainer:
         self.scheduler = scheduler
         self.logger = logger
         self.device = device
-        self.scaler = GradScaler(device="cuda")
+        self.scaler = GradScaler()
         self.loss_milestones = [30.0, 20.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
         self.next_milestone_idx = 0
         self.global_step = 0
@@ -167,3 +167,19 @@ class Trainer:
 
             if self.scheduler:
                 self.scheduler.step()
+                
+
+                self.scheduler.step()
+
+            # Save checkpoint after each epoch
+            self.save_checkpoint(checkpoint_path)
+
+        # Log completion of final epoch
+        tqdm.write(f"\ud83c\udfce\ufe0f Finished training at epoch {num_epochs}")
+        if self.logger:
+            self.logger.log_metrics({
+                "final_epoch": num_epochs,
+                "final_loss": train_loss
+            }, step=self.global_step)
+
+        return train_loss
