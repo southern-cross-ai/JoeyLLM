@@ -1,5 +1,5 @@
 import torch
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
 from tqdm import tqdm
 import os
 import re
@@ -20,9 +20,10 @@ class Trainer:
         self.dataloader = dataloader
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.criterion = torch.nn.CrossEntropyLoss()
         self.logger = logger
         self.device = device
-        self.scaler = GradScaler()
+        self.scaler = GradScaler(device=self.device)
         self.loss_milestones = [30.0, 20.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
         self.next_milestone_idx = 0
         self.global_step = 0
@@ -33,12 +34,10 @@ class Trainer:
         outputs: [B, T, vocab_size]
         labels:  [B, T]
         """
-        criterion = torch.nn.CrossEntropyLoss()
         B, T, V = outputs.size()
         outputs = outputs.view(B * T, V)    # [B*T, V]
         labels = labels.view(B * T)         # [B*T]
-        return criterion(outputs, labels)
-
+        return self.criterion(outputs, labels)
 
     def _train_epoch(self, epoch):
         self.model.train()
@@ -54,7 +53,7 @@ class Trainer:
 
             self.optimizer.zero_grad()
 
-            with autocast(device_type="cuda"):
+            with autocast(device_type=self.device):
                 outputs = self.model(inputs)
                 loss = self.compute_loss(outputs, labels)
 
@@ -166,9 +165,6 @@ class Trainer:
             train_loss = self._train_epoch(epoch)
 
             if self.scheduler:
-                self.scheduler.step()
-                
-
                 self.scheduler.step()
 
             # Save checkpoint after each epoch
