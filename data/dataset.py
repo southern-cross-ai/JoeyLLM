@@ -9,7 +9,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
         self.tokenizer = tokenizer
         self.chunk_size = chunk_size
         self.buffer_text_size = buffer_text_size
-
+        
     def __iter__(self):
         buffer = []
         token_buffer = []
@@ -58,12 +58,14 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
 def get_dataloader(data_path, chunk_size, buffer_text_size, batch_size, num_workers):
     tokenizer = tiktoken.get_encoding("cl100k_base")
 
+    buffer_size = max(10_000, buffer_text_size * 5)
+
     dataset = load_dataset(
         "HuggingFaceFW/fineweb",
         data_dir=data_path,
         split="train",
         streaming=True
-    )
+    ).shuffle(buffer_size=buffer_size)
 
     token_dataset = BufferedStreamTokenChunkDataset(
         hf_streaming_dataset=dataset,

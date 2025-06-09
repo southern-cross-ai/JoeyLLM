@@ -46,15 +46,17 @@ def main(cfg: DictConfig):
         model=model,
         dataloader=dataloader,
         optimizer=optimizer,
-        logger=None,
+        logger=logger,
         scheduler=None,
         device="cuda" if torch.cuda.is_available() else "cpu"
     )
 
     trainer.fit(
         num_epochs=1,
-        checkpoint_path="checkpoints/checkpoint.pth"
+        checkpoint_path="checkpoints/checkpoint.pth",
+        resume_from_best=True
     )
+    
     
     print("🏁 Training complete!")
     

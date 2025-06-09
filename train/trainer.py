@@ -2,6 +2,7 @@ import torch
 from torch.amp import autocast, GradScaler
 from tqdm import tqdm
 import os
+import re
 
 
 class Trainer:
@@ -24,6 +25,8 @@ class Trainer:
         self.scaler = GradScaler(device="cuda")
         self.loss_milestones = [30.0, 20.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
         self.next_milestone_idx = 0
+        self.global_step = 0
+
 
     def compute_loss(self, outputs, labels):
         """
@@ -78,11 +81,13 @@ class Trainer:
             progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
             progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
             
-            # loger
+            # logger
+            self.global_step += 1
             if self.logger:
                 self.logger.log_metrics({
-                    "train_loss": loss.item()
-                }, step=epoch * len(self.dataloader) + batch_idx)
+                    "train_loss": loss_value,
+                    "avg_running_loss": avg_running_loss
+                }, step=self.global_step)
 
         progress_bar.close()
         tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
@@ -111,7 +116,52 @@ class Trainer:
             self.scheduler.load_state_dict(checkpoint["scheduler_state"])
         print(f"✅ Checkpoint loaded from {path}")
 
-    def fit(self, num_epochs, checkpoint_path="checkpoints/checkpoint.pth"):
+    def resume_from_best_checkpoint(self, folder="checkpoints"):
+        """
+        Finds and loads the checkpoint with the lowest milestone loss.
+        """
+        if not os.path.exists(folder):
+            print(f"📂 No checkpoint folder found at {folder}")
+            return False
+
+        pattern = re.compile(r"below_(\d+\.\d+)_loss\.pth")
+        best_loss = float("inf")
+        best_path = None
+
+        for filename in os.listdir(folder):
+            match = pattern.match(filename)
+            if match:
+                loss = float(match.group(1))
+                if loss < best_loss:
+                    best_loss = loss
+                    best_path = os.path.join(folder, filename)
+
+        if best_path:
+            print(f"📦 Resuming from best checkpoint: {best_path}")
+            self.load_checkpoint(best_path)
+            
+            # 🧠 Update milestone index to skip saved ones
+            for i, milestone in enumerate(self.loss_milestones):
+                if milestone <= best_loss:
+                    self.next_milestone_idx = i + 1
+                    break
+            else:
+                self.next_milestone_idx = len(self.loss_milestones)
+
+
+            # Add this:
+            print(f"⏭️ Skipping to milestone index: {self.next_milestone_idx} ({self.loss_milestones[self.next_milestone_idx] if self.next_milestone_idx < len(self.loss_milestones) else 'done'})")
+
+            return True
+            
+        else:
+            print("🚫 No matching loss-based checkpoints found.")
+            return False
+
+    def fit(self, num_epochs, checkpoint_path="checkpoints/checkpoint.pth", resume_from_best=True):
+        if resume_from_best:
+            self.resume_from_best_checkpoint(folder=os.path.dirname(checkpoint_path))
+
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
 
