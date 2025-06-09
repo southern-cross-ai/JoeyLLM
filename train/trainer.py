@@ -1,6 +1,7 @@
 import torch
 from torch.amp import autocast, GradScaler
 from tqdm import tqdm
+import os
 
 
 class Trainer:
@@ -10,8 +11,8 @@ class Trainer:
         model,
         dataloader,
         optimizer,
+        logger,
         scheduler=None,
-        logger=None,
         device="cuda"
     ):
         self.model = model.to(device)
@@ -21,6 +22,8 @@ class Trainer:
         self.logger = logger
         self.device = device
         self.scaler = GradScaler(device="cuda")
+        self.loss_milestones = [30.0, 20.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
+        self.next_milestone_idx = 0
 
     def compute_loss(self, outputs, labels):
         """
@@ -36,7 +39,8 @@ class Trainer:
 
     def _train_epoch(self, epoch):
         self.model.train()
-        total_loss = 0
+        self.running_loss = 0.0
+        self.total_batches = 0
 
         progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False)
 
@@ -55,32 +59,39 @@ class Trainer:
             self.scaler.step(self.optimizer)
             self.scaler.update()
 
-            total_loss += loss.item()
-            progress_bar.set_postfix(loss=loss.item())
+            # === 🔁 Milestone Logic ===
+            loss_value = loss.item()
+            self.running_loss += loss_value
+            self.total_batches += 1
+            avg_running_loss = self.running_loss / self.total_batches
 
+            # 🧠 Check against current milestone
+            if self.next_milestone_idx < len(self.loss_milestones):
+                milestone = self.loss_milestones[self.next_milestone_idx]
+                if avg_running_loss < milestone:
+                    save_path = f"checkpoints/below_{milestone:.1f}_loss.pth"
+                    self.save_checkpoint(save_path)
+                    tqdm.write(f"📉 Saved checkpoint at avg loss < {milestone:.1f} (avg: {avg_running_loss:.4f})")
+                    self.next_milestone_idx += 1
 
-            #pbar
+            # === Progress + Logging ===
             progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
-            progress_bar.set_postfix(loss=loss.item())
+            progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
             
             # loger
             if self.logger:
-                self.logger.log_message(msg)
                 self.logger.log_metrics({
                     "train_loss": loss.item()
                 }, step=epoch * len(self.dataloader) + batch_idx)
-        
-        # fix or iterable dataloader
-        try:
-            avg_loss = total_loss / len(self.dataloader)
-        except TypeError:
-            avg_loss = total_loss / (batch_idx + 1)
-        
-        tqdm.write(f"✅ Epoch {epoch} | Avg Training Loss: {avg_loss:.4f}")
-        
-        return avg_loss
+
+        progress_bar.close()
+        tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
+        return avg_running_loss
+
 
     def save_checkpoint(self, path):
+        print(f"📝 Attempting to save checkpoint to: {os.path.abspath(path)}")
+
         checkpoint = {
             "model_state": self.model.state_dict(),
             "optimizer_state": self.optimizer.state_dict(),
@@ -103,7 +114,6 @@ class Trainer:
     def fit(self, num_epochs, checkpoint_path="checkpoints/checkpoint.pth"):
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
-            self.save_checkpoint(checkpoint_path)
 
             if self.scheduler:
                 self.scheduler.step()
