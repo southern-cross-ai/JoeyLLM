@@ -109,8 +109,19 @@ class Trainer:
         print(f"✅ Checkpoint saved to {path}")
 
     def load_checkpoint(self, path):
-        checkpoint = torch.load(path)
-        self.model.load_state_dict(checkpoint["model_state"])
+        checkpoint = torch.load(path, map_location=self.device)
+
+        # When using DistributedDataParallel the wrapped model has a
+        # ``module`` attribute. Since checkpoints are saved from the
+        # underlying model, we need to load the state dict into the
+        # wrapped module when resuming training.
+        model_to_load = (
+            self.model.module
+            if isinstance(self.model, torch.nn.parallel.DistributedDataParallel)
+            else self.model
+        )
+
+        model_to_load.load_state_dict(checkpoint["model_state"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state"])
         self.scaler.load_state_dict(checkpoint["scaler_state"])
         if self.scheduler and "scheduler_state" in checkpoint:
