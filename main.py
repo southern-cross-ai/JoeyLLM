@@ -69,7 +69,8 @@ def main(cfg: DictConfig):
             optimizer=optimizer,
             logger=logger,
             scheduler=None,
-            device=device
+            device=device,
+            rank=rank
         )
 
         trainer.fit(

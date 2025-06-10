@@ -14,7 +14,8 @@ class Trainer:
         optimizer,
         logger,
         scheduler=None,
-        device="cuda"
+        device="cuda",
+        rank: int = 0
     ):
         self.model = model.to(device)
         self.dataloader = dataloader
@@ -24,6 +25,7 @@ class Trainer:
         self.logger = logger
         self.device = device
         self.scaler = GradScaler(device=self.device)
+        self.rank = rank
         self.loss_milestones = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.5, 3.0, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.0]
         self.next_milestone_idx = 0
         self.global_step = 0
@@ -94,6 +96,8 @@ class Trainer:
 
 
     def save_checkpoint(self, path):
+        if self.rank != 0:
+            return
         print(f"📝 Attempting to save checkpoint to: {os.path.abspath(path)}")
 
         model_to_save = self.model.module if isinstance(self.model, torch.nn.parallel.DistributedDataParallel) else self.model
@@ -111,10 +115,6 @@ class Trainer:
     def load_checkpoint(self, path):
         checkpoint = torch.load(path, map_location=self.device)
 
-        # When using DistributedDataParallel the wrapped model has a
-        # ``module`` attribute. Since checkpoints are saved from the
-        # underlying model, we need to load the state dict into the
-        # wrapped module when resuming training.
         model_to_load = (
             self.model.module
             if isinstance(self.model, torch.nn.parallel.DistributedDataParallel)
