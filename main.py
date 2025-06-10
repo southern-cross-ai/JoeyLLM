@@ -1,27 +1,12 @@
 import os
 import hydra
 import torch
-import torch.distributed as dist
 from omegaconf import DictConfig, OmegaConf
 from model import JoeyLLM
 from data import get_dataloader
 from utils.logger import wandbLogger
 from train.trainer import Trainer
-
-
-def init_distributed() -> tuple[int, int, int, bool]:
-    """Initializes distributed training if launched with torchrun."""
-    if "RANK" in os.environ and "WORLD_SIZE" in os.environ:
-        rank = int(os.environ["RANK"])
-        world_size = int(os.environ["WORLD_SIZE"])
-        local_rank = int(os.environ.get("LOCAL_RANK", rank))
-        backend = "nccl" if torch.cuda.is_available() else "gloo"
-        dist.init_process_group(backend=backend)
-        if torch.cuda.is_available():
-            torch.cuda.set_device(local_rank)
-        return rank, world_size, local_rank, True
-    return 0, 1, 0, False
-
+from utils.distributed import init_distributed, cleanup_distributed
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
@@ -101,7 +86,7 @@ def main(cfg: DictConfig):
 
     finally:
         if distributed:
-            dist.destroy_process_group()
+            cleanup_distributed()
 
         if rank == 0:
             print("✅ Done!")
