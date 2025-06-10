@@ -24,7 +24,7 @@ class Trainer:
         self.logger = logger
         self.device = device
         self.scaler = GradScaler(device=self.device)
-        self.loss_milestones = [30.0, 20.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
+        self.loss_milestones = [6.0, 5.0, 4.0, 3.5, 3.0, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.0]
         self.next_milestone_idx = 0
         self.global_step = 0
 
@@ -53,7 +53,7 @@ class Trainer:
 
             self.optimizer.zero_grad()
 
-            with autocast(device_type=self.device):
+            with autocast(device_type=self.device.type):
                 outputs = self.model(inputs)
                 loss = self.compute_loss(outputs, labels)
 
@@ -96,8 +96,10 @@ class Trainer:
     def save_checkpoint(self, path):
         print(f"📝 Attempting to save checkpoint to: {os.path.abspath(path)}")
 
+        model_to_save = self.model.module if isinstance(self.model, torch.nn.parallel.DistributedDataParallel) else self.model
+
         checkpoint = {
-            "model_state": self.model.state_dict(),
+            "model_state": model_to_save.state_dict(),
             "optimizer_state": self.optimizer.state_dict(),
             "scaler_state": self.scaler.state_dict()
         }
