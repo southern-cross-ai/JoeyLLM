@@ -20,7 +20,7 @@ def init_distributed() -> tuple[int, int, int, bool]:
     if torch.cuda.is_available():
         torch.cuda.set_device(local_rank)
 
-    return rank, world_size, local_rank, True
+    return rank, world_size, local_rank
 
 
 def cleanup_distributed() -> None:

@@ -10,7 +10,7 @@ from utils.distributed import init_distributed, cleanup_distributed
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
-    rank, world_size, local_rank, distributed = init_distributed()
+    rank, world_size, local_rank = init_distributed()
 
     try:
         if rank == 0:
@@ -18,7 +18,6 @@ def main(cfg: DictConfig):
 
         wandbLogger.set_mode(cfg.wandb.mode)
 
-        torch.cuda.set_device(local_rank)
         device = torch.device(f"cuda:{local_rank}")
         
         logger = None
@@ -55,14 +54,14 @@ def main(cfg: DictConfig):
         
         if rank == 0:
             print("📈 Loading Optimizer")
-        
-        optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
-        if distributed:
+        if world_size > 1:
             model = torch.nn.parallel.DistributedDataParallel(
                 model,
                 device_ids=[local_rank] if torch.cuda.is_available() else None,
             )
+
+        optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
         if logger:
             logger.watch_model(model, log="all", log_freq=10000)
@@ -90,7 +89,7 @@ def main(cfg: DictConfig):
             logger.finish()
 
     finally:
-        if distributed:
+        if world_size > 1:
             cleanup_distributed()
 
         if rank == 0:

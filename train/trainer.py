@@ -1,6 +1,7 @@
 import torch
 from torch.amp import autocast, GradScaler
 from torchsnapshot import Snapshot
+import torch.distributed as dist
 from tqdm import tqdm
 import os
 import glob
@@ -26,9 +27,8 @@ class Trainer:
         self.scaler = GradScaler(device=self.device)
         self.rank = rank
         self.global_step = 0
+        self.save_interval = 1000  
 
-        self.loss_milestones = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.5, 3.0, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.0]
-        self.next_milestone_idx = 0
 
         self.snapshot_dir = "snapshots"
         self.snapshot_app_state = {
@@ -71,20 +71,20 @@ class Trainer:
             self.total_batches += 1
             avg_running_loss = self.running_loss / self.total_batches
 
-            # Milestone snapshotting
-            if self.rank == 0 and self.next_milestone_idx < len(self.loss_milestones):
-                milestone = self.loss_milestones[self.next_milestone_idx]
-                if avg_running_loss < milestone:
-                    milestone_path = os.path.join(self.snapshot_dir, f"below_{milestone:.1f}")
-                    Snapshot.take(
-                        path=milestone_path,
-                        app_state=self.snapshot_app_state,
-                        app_metadata={"avg_loss": avg_running_loss},
-                        replicated=["model"]
-                    )
-                    tqdm.write(f"📉 Snapshot saved for avg loss < {milestone:.1f} (avg: {avg_running_loss:.4f})")
-                    self.next_milestone_idx += 1
-
+            # Fixed-step snapshotting
+            if self.global_step % self.save_interval == 0:
+                snapshot_path = os.path.join(self.snapshot_dir, f"step_{self.global_step}")
+                if dist.is_initialized():
+                    dist.barrier()
+                Snapshot.take(
+                    path=snapshot_path,
+                    app_state=self.snapshot_app_state,
+                    app_metadata={"global_step": self.global_step},
+                    replicated=["model"]
+                )
+                if self.rank == 0:
+                    tqdm.write(f"💾 Snapshot saved at step {self.global_step}")
+    
             progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
             progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
 
@@ -101,19 +101,25 @@ class Trainer:
 
     def resume_latest_snapshot(self):
         if not os.path.exists(self.snapshot_dir):
-            print("📂 No snapshot directory found.")
+            if self.rank == 0:
+                print("📂 No snapshot directory found.")
             return False
 
         snapshot_dirs = sorted(glob.glob(os.path.join(self.snapshot_dir, "*")), reverse=True)
         if not snapshot_dirs:
-            print("🚫 No snapshot found.")
+            if self.rank == 0:
+                print("🚫 No snapshot found.")
             return False
 
         latest_path = snapshot_dirs[0]
-        print(f"📦 Resuming from snapshot at {latest_path}")
+        if self.rank == 0:
+            print(f"📦 Resuming from snapshot at {latest_path}")
+
+        # Restore model state on all ranks
         Snapshot(path=latest_path).restore()
         self.model.train()
         return True
+
 
     def fit(self, num_epochs, resume_from_latest=True):
         if resume_from_latest:
@@ -126,13 +132,17 @@ class Trainer:
                 self.scheduler.step()
 
             # Optional: save snapshot each epoch
-            if self.rank == 0:
+            if dist.is_initialized():
+                dist.barrier()
                 Snapshot.take(
                     path=os.path.join(self.snapshot_dir, f"epoch_{epoch}"),
                     app_state=self.snapshot_app_state,
                     app_metadata={"epoch": epoch, "global_step": self.global_step},
                     replicated=["model"]
                 )
+
+            if self.rank == 0:
+                tqdm.write(f"📦 Epoch {epoch} snapshot saved")
 
         tqdm.write(f"🏁 Finished training at epoch {num_epochs}")
         if self.logger:
