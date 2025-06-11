@@ -109,14 +109,13 @@ class Trainer:
             if self.rank == 0:
                 print("📂 No snapshot directory found.")
             return False
-
-        snapshot_dirs = sorted(glob.glob(os.path.join(self.snapshot_dir, "*")), reverse=True)
-        if not snapshot_dirs:
+        
+        latest_path = os.path.join(self.snapshot_dir, "latest")
+        if not os.path.exists(latest_path):
             if self.rank == 0:
-                print("🚫 No snapshot found.")
+                print("🚫 No snapshot found at 'latest'.")
             return False
 
-        latest_path = snapshot_dirs[0]
         if self.rank == 0:
             print(f"📦 Resuming from snapshot at {latest_path}")
 
