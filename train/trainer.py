@@ -50,7 +50,7 @@ class Trainer:
         self.running_loss = 0.0
         self.total_batches = 0
 
-        progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False)
+        progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False) if self.rank == 0 else self.dataloader
 
         for batch_idx, batch in enumerate(progress_bar):
             inputs = batch["inputs"].to(self.device)
@@ -79,14 +79,14 @@ class Trainer:
                 Snapshot.take(
                     path=snapshot_path,
                     app_state=self.snapshot_app_state,
-                    app_metadata={"global_step": self.global_step},
                     replicated=["model"]
                 )
                 if self.rank == 0:
                     tqdm.write(f"💾 Snapshot saved at step {self.global_step}")
     
-            progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
-            progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
+            if self.rank == 0:
+                progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
+                progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
 
             self.global_step += 1
             if self.logger:
@@ -95,8 +95,12 @@ class Trainer:
                     "avg_running_loss": avg_running_loss
                 }, step=self.global_step)
 
-        progress_bar.close()
-        tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
+        if self.rank == 0:
+            progress_bar.close()
+        
+        if self.rank == 0:
+            tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
+        
         return avg_running_loss
 
     def resume_latest_snapshot(self):
@@ -116,7 +120,7 @@ class Trainer:
             print(f"📦 Resuming from snapshot at {latest_path}")
 
         # Restore model state on all ranks
-        Snapshot(path=latest_path).restore()
+        Snapshot(path=latest_path).restore(app_state=self.snapshot_app_state)
         self.model.train()
         return True
 
@@ -137,14 +141,15 @@ class Trainer:
                 Snapshot.take(
                     path=os.path.join(self.snapshot_dir, f"epoch_{epoch}"),
                     app_state=self.snapshot_app_state,
-                    app_metadata={"epoch": epoch, "global_step": self.global_step},
                     replicated=["model"]
                 )
 
             if self.rank == 0:
                 tqdm.write(f"📦 Epoch {epoch} snapshot saved")
 
-        tqdm.write(f"🏁 Finished training at epoch {num_epochs}")
+        if self.rank == 0:
+            tqdm.write(f"🏁 Finished training at epoch {num_epochs}")
+        
         if self.logger:
             self.logger.log_metrics({
                 "final_epoch": num_epochs,
