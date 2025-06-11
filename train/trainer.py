@@ -27,7 +27,7 @@ class Trainer:
         self.scaler = GradScaler(device=self.device)
         self.rank = rank
         self.global_step = 0
-        self.save_interval = 1000  
+        self.save_interval = 2000  
 
 
         self.snapshot_dir = "snapshots"
@@ -73,7 +73,8 @@ class Trainer:
 
             # Fixed-step snapshotting
             if self.global_step % self.save_interval == 0:
-                snapshot_path = os.path.join(self.snapshot_dir, f"step_{self.global_step}")
+                snapshot_path = os.path.join(self.snapshot_dir, "latest")
+
                 if dist.is_initialized():
                     dist.barrier()
                 Snapshot.take(
