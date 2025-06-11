@@ -1,12 +1,11 @@
 import torch
 from torch.amp import autocast, GradScaler
+from torchsnapshot import Snapshot
 from tqdm import tqdm
 import os
-import re
-
+import glob
 
 class Trainer:
-
     def __init__(
         self,
         model,
@@ -26,19 +25,24 @@ class Trainer:
         self.device = device
         self.scaler = GradScaler(device=self.device)
         self.rank = rank
-        self.loss_milestones = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.5, 3.0, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.0]
-        self.next_milestone_idx = 0
         self.global_step = 0
 
+        self.loss_milestones = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.5, 3.0, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.0]
+        self.next_milestone_idx = 0
+
+        self.snapshot_dir = "snapshots"
+        self.snapshot_app_state = {
+            "model": self.model,
+            "optimizer": self.optimizer,
+            "scaler": self.scaler,
+        }
+        if self.scheduler:
+            self.snapshot_app_state["scheduler"] = self.scheduler
 
     def compute_loss(self, outputs, labels):
-        """
-        outputs: [B, T, vocab_size]
-        labels:  [B, T]
-        """
         B, T, V = outputs.size()
-        outputs = outputs.view(B * T, V)    # [B*T, V]
-        labels = labels.view(B * T)         # [B*T]
+        outputs = outputs.view(B * T, V)
+        labels = labels.view(B * T)
         return self.criterion(outputs, labels)
 
     def _train_epoch(self, epoch):
@@ -49,7 +53,6 @@ class Trainer:
         progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False)
 
         for batch_idx, batch in enumerate(progress_bar):
-
             inputs = batch["inputs"].to(self.device)
             labels = batch["labels"].to(self.device)
 
@@ -63,26 +66,28 @@ class Trainer:
             self.scaler.step(self.optimizer)
             self.scaler.update()
 
-            # === 🔁 Milestone Logic ===
             loss_value = loss.item()
             self.running_loss += loss_value
             self.total_batches += 1
             avg_running_loss = self.running_loss / self.total_batches
 
-            # 🧠 Check against current milestone
-            if self.next_milestone_idx < len(self.loss_milestones):
+            # Milestone snapshotting
+            if self.rank == 0 and self.next_milestone_idx < len(self.loss_milestones):
                 milestone = self.loss_milestones[self.next_milestone_idx]
                 if avg_running_loss < milestone:
-                    save_path = f"checkpoints/below_{milestone:.1f}_loss.pth"
-                    self.save_checkpoint(save_path)
-                    tqdm.write(f"📉 Saved checkpoint at avg loss < {milestone:.1f} (avg: {avg_running_loss:.4f})")
+                    milestone_path = os.path.join(self.snapshot_dir, f"below_{milestone:.1f}")
+                    Snapshot.take(
+                        path=milestone_path,
+                        app_state=self.snapshot_app_state,
+                        app_metadata={"avg_loss": avg_running_loss},
+                        replicated=["model"]
+                    )
+                    tqdm.write(f"📉 Snapshot saved for avg loss < {milestone:.1f} (avg: {avg_running_loss:.4f})")
                     self.next_milestone_idx += 1
 
-            # === Progress + Logging ===
             progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
             progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
-            
-            # logger
+
             self.global_step += 1
             if self.logger:
                 self.logger.log_metrics({
@@ -94,85 +99,25 @@ class Trainer:
         tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
         return avg_running_loss
 
-
-    def save_checkpoint(self, path):
-        if self.rank != 0:
-            return
-        print(f"📝 Attempting to save checkpoint to: {os.path.abspath(path)}")
-
-        model_to_save = self.model.module if isinstance(self.model, torch.nn.parallel.DistributedDataParallel) else self.model
-
-        checkpoint = {
-            "model_state": model_to_save.state_dict(),
-            "optimizer_state": self.optimizer.state_dict(),
-            "scaler_state": self.scaler.state_dict()
-        }
-        if self.scheduler:
-            checkpoint["scheduler_state"] = self.scheduler.state_dict()
-        torch.save(checkpoint, path)
-        print(f"✅ Checkpoint saved to {path}")
-
-    def load_checkpoint(self, path):
-        checkpoint = torch.load(path, map_location=self.device)
-
-        model_to_load = (
-            self.model.module
-            if isinstance(self.model, torch.nn.parallel.DistributedDataParallel)
-            else self.model
-        )
-
-        model_to_load.load_state_dict(checkpoint["model_state"])
-        self.optimizer.load_state_dict(checkpoint["optimizer_state"])
-        self.scaler.load_state_dict(checkpoint["scaler_state"])
-        if self.scheduler and "scheduler_state" in checkpoint:
-            self.scheduler.load_state_dict(checkpoint["scheduler_state"])
-        print(f"✅ Checkpoint loaded from {path}")
-
-    def resume_from_best_checkpoint(self, folder="checkpoints"):
-        """
-        Finds and loads the checkpoint with the lowest milestone loss.
-        """
-        if not os.path.exists(folder):
-            print(f"📂 No checkpoint folder found at {folder}")
+    def resume_latest_snapshot(self):
+        if not os.path.exists(self.snapshot_dir):
+            print("📂 No snapshot directory found.")
             return False
 
-        pattern = re.compile(r"below_(\d+\.\d+)_loss\.pth")
-        best_loss = float("inf")
-        best_path = None
-
-        for filename in os.listdir(folder):
-            match = pattern.match(filename)
-            if match:
-                loss = float(match.group(1))
-                if loss < best_loss:
-                    best_loss = loss
-                    best_path = os.path.join(folder, filename)
-
-        if best_path:
-            print(f"📦 Resuming from best checkpoint: {best_path}")
-            self.load_checkpoint(best_path)
-            
-            # 🧠 Update milestone index to skip saved ones
-            for i, milestone in enumerate(self.loss_milestones):
-                if milestone <= best_loss:
-                    self.next_milestone_idx = i + 1
-                    break
-            else:
-                self.next_milestone_idx = len(self.loss_milestones)
-
-
-            # Add this:
-            print(f"⏭️ Skipping to milestone index: {self.next_milestone_idx} ({self.loss_milestones[self.next_milestone_idx] if self.next_milestone_idx < len(self.loss_milestones) else 'done'})")
-
-            return True
-            
-        else:
-            print("🚫 No matching loss-based checkpoints found.")
+        snapshot_dirs = sorted(glob.glob(os.path.join(self.snapshot_dir, "*")), reverse=True)
+        if not snapshot_dirs:
+            print("🚫 No snapshot found.")
             return False
 
-    def fit(self, num_epochs, checkpoint_path="checkpoints/checkpoint.pth", resume_from_best=True):
-        if resume_from_best:
-            self.resume_from_best_checkpoint(folder=os.path.dirname(checkpoint_path))
+        latest_path = snapshot_dirs[0]
+        print(f"📦 Resuming from snapshot at {latest_path}")
+        Snapshot(path=latest_path).restore()
+        self.model.train()
+        return True
+
+    def fit(self, num_epochs, resume_from_latest=True):
+        if resume_from_latest:
+            self.resume_latest_snapshot()
 
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
@@ -180,11 +125,16 @@ class Trainer:
             if self.scheduler:
                 self.scheduler.step()
 
-            # Save checkpoint after each epoch
-            self.save_checkpoint(checkpoint_path)
+            # Optional: save snapshot each epoch
+            if self.rank == 0:
+                Snapshot.take(
+                    path=os.path.join(self.snapshot_dir, f"epoch_{epoch}"),
+                    app_state=self.snapshot_app_state,
+                    app_metadata={"epoch": epoch, "global_step": self.global_step},
+                    replicated=["model"]
+                )
 
-        # Log completion of final epoch
-        tqdm.write(f"\ud83c\udfce\ufe0f Finished training at epoch {num_epochs}")
+        tqdm.write(f"🏁 Finished training at epoch {num_epochs}")
         if self.logger:
             self.logger.log_metrics({
                 "final_epoch": num_epochs,

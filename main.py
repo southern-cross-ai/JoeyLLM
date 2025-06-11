@@ -18,14 +18,18 @@ def main(cfg: DictConfig):
 
         wandbLogger.set_mode(cfg.wandb.mode)
 
+        torch.cuda.set_device(local_rank)
+        device = torch.device(f"cuda:{local_rank}")
+        
         logger = None
         if rank == 0:
             logger = wandbLogger(
                 project_name=cfg.wandb.project,
                 config=OmegaConf.to_container(cfg, resolve=True)
             )
-
-        print("📦 Loading Dataset...")
+        if rank == 0:
+            print("📦 Loading Dataset...")
+        
         dataloader = get_dataloader(
             data_path=cfg.data.data_path,
             chunk_size=cfg.data.chunk_size,
@@ -35,10 +39,10 @@ def main(cfg: DictConfig):
             world_size=world_size,
             rank=rank
         )
-
-        device = torch.device(f"cuda:{local_rank}" if torch.cuda.is_available() else "cpu")
-
-        print("🧠 Initializing Model...")
+        if rank == 0:
+            print("🧠 Initializing Model...")
+        
+        
         model = JoeyLLM(
             vocab_size=cfg.model.vocab_size,
             max_seq_len=cfg.model.max_seq_len,
@@ -50,8 +54,10 @@ def main(cfg: DictConfig):
 
         if logger:
             logger.watch_model(model, log="all", log_freq=10000)
-
-        print("📈 Loading Optimizer")
+        
+        if rank == 0:
+            print("📈 Loading Optimizer")
+        
         optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
         if distributed:
@@ -73,11 +79,8 @@ def main(cfg: DictConfig):
             rank=rank
         )
 
-        trainer.fit(
-            num_epochs=1,
-            checkpoint_path="checkpoints/checkpoint.pth",
-            resume_from_best=True
-        )
+        trainer.fit(num_epochs=1, resume_from_latest=True)
+
 
         if rank == 0:
             print("🏁 Training complete!")
