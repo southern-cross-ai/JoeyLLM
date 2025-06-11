@@ -52,8 +52,6 @@ def main(cfg: DictConfig):
             dropout=cfg.model.dropout,
         ).to(device)
 
-        if logger:
-            logger.watch_model(model, log="all", log_freq=10000)
         
         if rank == 0:
             print("📈 Loading Optimizer")
@@ -65,6 +63,9 @@ def main(cfg: DictConfig):
                 model,
                 device_ids=[local_rank] if torch.cuda.is_available() else None,
             )
+
+        if logger:
+            logger.watch_model(model, log="all", log_freq=10000)
 
         if rank == 0:
             print("🚀 Launching Trainer...")
