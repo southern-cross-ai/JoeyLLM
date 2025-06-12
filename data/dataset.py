@@ -19,7 +19,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
             if len(buffer) >= self.buffer_text_size:
                 tokenized = self.tokenizer.encode(
                     " ".join(buffer),
-                    allowed_special=self.tokenizer.special_tokens_set
+                    disallowed_special=()
                 )
                 token_buffer.extend(tokenized)
                 buffer = []
@@ -39,7 +39,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
         if buffer:
             tokenized = self.tokenizer.encode(
                 " ".join(buffer),
-                allowed_special=self.tokenizer.special_tokens_set
+                disallowed_special=()
             )
             token_buffer.extend(tokenized)
 
