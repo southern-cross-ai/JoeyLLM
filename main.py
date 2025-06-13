@@ -5,7 +5,7 @@ from omegaconf import DictConfig, OmegaConf
 from model import JoeyLLM
 from data import get_dataloader
 from utils.logger import wandbLogger
-from utils.scheduler import StreamingCosineWithLossFallback
+from utils.scheduler import LossAdaptiveWarmupScheduler
 from train.trainer import Trainer
 from utils.distributed import init_distributed, cleanup_distributed
 from transformers import get_cosine_schedule_with_warmup
@@ -65,14 +65,13 @@ def main(cfg: DictConfig):
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
-        scheduler = StreamingCosineWithLossFallback(
-            optimizer=optimizer,
-            num_warmup_steps=1500,
-            num_training_steps=150000,
-            factor=0.5,
-            patience=3,
-            threshold=1e-4,
-            window_size=1000 
+        scheduler = LossAdaptiveWarmupScheduler(
+            optimizer,
+            init_lr=2e-4,
+            warmup_steps=1000,
+            decay_factor=0.7,
+            patience=2,
+            window_size=1000
         )
 
         if logger:
