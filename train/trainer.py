@@ -28,7 +28,7 @@ class Trainer:
         self.scaler = GradScaler(device=self.device)
         self.rank = rank
         self.global_step = 0
-        self.save_interval = 2000  
+        self.save_interval = 5000  
         self.retention_limit = 2
         self.pending_snapshot = None
 
