@@ -1,13 +1,13 @@
 import torch
 from torch.amp import autocast, GradScaler
-from torchsnapshot import Snapshot
+from torchsnapshot import Snapshot, Stateful
 import torch.distributed as dist
 from tqdm import tqdm
 import shutil
 import os
 import glob
 
-class Trainer:
+class Trainer(Stateful):
     def __init__(
         self,
         model,
@@ -37,9 +37,16 @@ class Trainer:
             "model": self.model,
             "optimizer": self.optimizer,
             "scaler": self.scaler,
+            "trainer": self
         }
         if self.scheduler:
             self.snapshot_app_state["scheduler"] = self.scheduler
+
+    def state_dict(self):
+        return {"global_step": self.global_step}
+
+    def load_state_dict(self, state):
+        self.global_step = state.get("global_step", 0)
 
     def compute_loss(self, outputs, labels):
         B, T, V = outputs.size()
@@ -51,14 +58,12 @@ class Trainer:
         if self.rank != 0:
             return
 
-        # List all step_* dirs (like step_2000)
         all_step_dirs = sorted(
             glob.glob(os.path.join(self.snapshot_dir, "step_*")),
             key=os.path.getmtime,
             reverse=True
         )
 
-        # Keep only the newest `retention_limit` entries
         for old_dir in all_step_dirs[self.retention_limit:]:
             tqdm.write(f"🧹 Removing old snapshot: {old_dir}")
             shutil.rmtree(old_dir, ignore_errors=True)
@@ -73,20 +78,17 @@ class Trainer:
         if dist.is_initialized():
             dist.barrier()
 
-        # Wait for previous async snapshot if needed
         if self.pending_snapshot and not self.pending_snapshot.done():
             if self.rank == 0:
                 tqdm.write("⏳ Waiting for previous async snapshot to finish...")
             self.pending_snapshot.wait()
 
-        # Start async snapshot to 'latest'
         self.pending_snapshot = Snapshot.async_take(
             path=snapshot_path_latest,
             app_state=self.snapshot_app_state,
             replicated=["model"]
         )
 
-        # Optional rotated snapshot (sync)
         if snapshot_path_rotated:
             Snapshot.take(
                 path=snapshot_path_rotated,
@@ -95,11 +97,9 @@ class Trainer:
             )
 
         if self.rank == 0:
-            tqdm.write(f"💾 Async snapshot started at step {step if step else '[unknown]'}")
+            tqdm.write(f"📂 Async snapshot started at step {step if step else '[unknown]'}")
             self._rotate_snapshots()
 
-    
-    
     def _train_epoch(self, epoch):
         self.model.train()
         self.running_loss = 0.0
@@ -122,9 +122,16 @@ class Trainer:
             self.scaler.update()
 
             loss_value = loss.item()
+            if self.scheduler:
+                self.scheduler.step(loss=loss_value)
             self.running_loss += loss_value
             self.total_batches += 1
             avg_running_loss = self.running_loss / self.total_batches
+
+            if self.logger and self.global_step % 100 == 0:
+                self.logger.log_metrics({
+                    "lr": self.scheduler.get_last_lr()[0] if self.scheduler else 0.0
+                }, step=self.global_step)
 
             if self.global_step % self.save_interval == 0:
                 self._save_snapshot(step=self.global_step)
@@ -142,10 +149,8 @@ class Trainer:
 
         if self.rank == 0:
             progress_bar.close()
-        
-        if self.rank == 0:
             tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
-        
+
         return avg_running_loss
 
     def resume_latest_snapshot(self):
@@ -153,7 +158,7 @@ class Trainer:
             if self.rank == 0:
                 print("📂 No snapshot directory found.")
             return False
-        
+
         latest_path = os.path.join(self.snapshot_dir, "latest")
         if not os.path.exists(latest_path):
             if self.rank == 0:
@@ -161,9 +166,8 @@ class Trainer:
             return False
 
         if self.rank == 0:
-            print(f"📦 Resuming from snapshot at {latest_path}")
+            print(f"📆 Resuming from snapshot at {latest_path}")
 
-        # Restore model state on all ranks
         Snapshot(path=latest_path).restore(app_state=self.snapshot_app_state)
         self.model.train()
         return True
@@ -175,21 +179,16 @@ class Trainer:
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
 
-            if self.scheduler:
-                self.scheduler.step()
-
-            # Optional: save snapshot each epoch
             if dist.is_initialized():
                 dist.barrier()
                 self._save_snapshot(step=f"epoch_{epoch}")
 
             if self.rank == 0:
-                tqdm.write(f"📦 Epoch {epoch} snapshot saved")
+                tqdm.write(f"📆 Epoch {epoch} snapshot saved")
 
         if self.rank == 0:
-            tqdm.write(f"🏁 Finished training at epoch {num_epochs}")
-        
-        # Ensure the final async snapshot finishes writing
+            tqdm.write(f"🌟 Finished training at epoch {num_epochs}")
+
         if self.pending_snapshot and not self.pending_snapshot.done():
             if self.rank == 0:
                 tqdm.write("🕓 Waiting for final async snapshot to complete...")
