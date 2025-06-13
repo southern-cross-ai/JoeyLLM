@@ -1,7 +1,8 @@
 import torch
 from torch.utils.data import IterableDataset, DataLoader
 from datasets import load_dataset
-import tiktoken
+from transformers import LlamaTokenizerFast
+
 
 class BufferedStreamTokenChunkDataset(IterableDataset):
     def __init__(self, hf_streaming_dataset, tokenizer, chunk_size, buffer_text_size=10000):
@@ -9,7 +10,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
         self.tokenizer = tokenizer
         self.chunk_size = chunk_size
         self.buffer_text_size = buffer_text_size
-        
+
     def __iter__(self):
         buffer = []
         token_buffer = []
@@ -17,10 +18,12 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
         for example in self.dataset:
             buffer.append(example["text"])
             if len(buffer) >= self.buffer_text_size:
-                tokenized = self.tokenizer.encode(
+                tokenized = self.tokenizer(
                     " ".join(buffer),
-                    disallowed_special=()
-                )
+                    return_attention_mask=False,
+                    return_token_type_ids=False,
+                    add_special_tokens=False,
+                )["input_ids"]
                 token_buffer.extend(tokenized)
                 buffer = []
 
@@ -29,7 +32,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
                     target_ids = token_buffer[1:self.chunk_size + 1]
 
                     yield {
-                        "inputs": torch.tensor(input_ids, dtype=torch.long),
+                        "input_ids": torch.tensor(input_ids, dtype=torch.long),
                         "labels": torch.tensor(target_ids, dtype=torch.long)
                     }
 
@@ -37,34 +40,37 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
 
         # Final flush
         if buffer:
-            tokenized = self.tokenizer.encode(
+            tokenized = self.tokenizer(
                 " ".join(buffer),
-                disallowed_special=()
-            )
+                return_attention_mask=False,
+                return_token_type_ids=False,
+                add_special_tokens=False,
+            )["input_ids"]
             token_buffer.extend(tokenized)
 
-        
         while len(token_buffer) >= self.chunk_size + 1:
             input_ids = token_buffer[:self.chunk_size]
             target_ids = token_buffer[1:self.chunk_size + 1]
 
             yield {
-                "inputs": torch.tensor(input_ids, dtype=torch.long),
+                "input_ids": torch.tensor(input_ids, dtype=torch.long),
                 "labels": torch.tensor(target_ids, dtype=torch.long)
-            }   
+            }
 
             token_buffer = token_buffer[self.chunk_size:]
 
+
 def get_dataloader(
-    data_path, 
-    chunk_size, 
-    buffer_text_size, 
-    batch_size, 
+    data_path,
+    chunk_size,
+    buffer_text_size,
+    batch_size,
     num_workers,
-    world_size: int = 1, rank: int = 0
-    ):
-    
-    tokenizer = tiktoken.get_encoding("cl100k_base")
+    tokenizer_path="path/to/your/tokenizer",
+    world_size: int = 1,
+    rank: int = 0
+):
+    tokenizer = LlamaTokenizerFast.from_pretrained(tokenizer_path)
 
     buffer_size = max(10_000, buffer_text_size * 5)
 
