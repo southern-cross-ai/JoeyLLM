@@ -69,9 +69,9 @@ def main(cfg: DictConfig):
             optimizer,
             init_lr=2e-4,
             warmup_steps=1000,
-            decay_factor=0.7,
-            patience=2,
-            window_size=1000
+            decay_factor=0.8,
+            patience=5,
+            window_size=1500
         )
 
         if logger:

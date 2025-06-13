@@ -9,9 +9,9 @@ class StreamingCosineWithLossFallback(Stateful):
         num_warmup_steps,
         num_training_steps,
         factor=0.2,
-        patience=3,
-        threshold=1e-4,
-        window_size=500
+        patience=5,
+        threshold=2e-4,
+        window_size=1500
     ):
         self.scheduler = get_cosine_schedule_with_warmup(
             optimizer,
@@ -86,10 +86,10 @@ class LossAdaptiveWarmupScheduler(Stateful):
         init_lr,
         warmup_steps=1000,
         patience=2,
-        threshold=1e-4,
+        threshold=2e-4,
         cooldown=0,
-        decay_factor=0.7,
-        warmup_multiplier=1.2,
+        decay_factor=0.8,
+        warmup_multiplier=1.1,
         window_size=500
     ):
         self.optimizer = optimizer
