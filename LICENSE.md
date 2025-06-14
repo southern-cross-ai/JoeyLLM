@@ -18,7 +18,7 @@ These additional terms apply to this repository and any **included code originat
 
 2. 🧠 Attribution Requirement  
    Public, commercial, and governmental users must visibly cite the following in documentation and derived works:  
-   > "Built on Southern Cross AI's JoeyLLM Tokenizer – https://huggingface.co/SouthernCrossAI/JoeyLLM_Tokenizer"
+   > "Built on Southern Cross AI's JoeyLLM – https://github.com/southern-cross-ai"
 
 3. 🏢 Restrictions on Large Entities  
    Use by any organization with:
