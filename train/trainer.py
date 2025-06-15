@@ -179,12 +179,12 @@ class Trainer(Stateful):
         for epoch in range(1, num_epochs + 1):
             train_loss = self._train_epoch(epoch)
 
-            if dist.is_initialized():
-                dist.barrier()
-                self._save_snapshot(step=f"epoch_{epoch}")
-
             if self.rank == 0:
-                tqdm.write(f"📆 Epoch {epoch} snapshot saved")
+                # 💾 Save model checkpoint at end of epoch
+                model_path = os.path.join(self.snapshot_dir, f"epoch_{epoch}_model.pt")
+                torch.save(self.model.state_dict(), model_path)
+                tqdm.write(f"💾 Saved model checkpoint at {model_path}")
+                tqdm.write(f"📆 Epoch {epoch} completed")
 
         if self.rank == 0:
             tqdm.write(f"🌟 Finished training at epoch {num_epochs}")
@@ -201,3 +201,4 @@ class Trainer(Stateful):
             }, step=self.global_step)
 
         return train_loss
+
