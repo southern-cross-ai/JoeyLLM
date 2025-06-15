@@ -65,13 +65,24 @@ def main(cfg: DictConfig):
 
         optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
+        # scheduler = LossAdaptiveWarmupScheduler(
+        #     optimizer,
+        #     init_lr=2e-4,
+        #     warmup_steps=1000,
+        #     decay_factor=0.8,
+        #     patience=5,
+        #     window_size=1500
+        # )
+
         scheduler = LossAdaptiveWarmupScheduler(
-            optimizer,
+            optimizer=optimizer,
             init_lr=2e-4,
-            warmup_steps=1000,
+            warmup_steps=2000,        # ~1.3% of total
             decay_factor=0.8,
             patience=5,
-            window_size=1500
+            threshold=2e-4,
+            window_size=1000,         # Better balance between sensitivity and smoothness
+            min_lr=1e-6               # Optional but highly recommended
         )
 
         if logger:
