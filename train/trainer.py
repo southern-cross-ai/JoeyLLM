@@ -1,6 +1,6 @@
-import 
 from torch.utils.data import Dataset
-from torch.nn import Module
+from torch.nn import Module, CrossEntropyLoss
+import deepspeed
 
 class Trainer():
 
@@ -12,33 +12,36 @@ class Trainer():
         config_path : str ="utils/deepspeed_config.json"
     ):
         
-        self.model = model,
-        self.dataset = dataset,
+        self.model = model
+        self.dataset = dataset
         self.logger = logger
-
-
+        self.loss_fn = CrossEntropyLoss()
         
+        self.model_engine, self.optimizer, self.train_dataloader, self.scheduler = deepspeed.initialize(
+            model=model,
+            model_parameters=model.parameters(),
+            training_data=dataset,
+            config=config_path
+            )
         
-    model_engine, optimizer, train_loader, scheduler = trainer.initialize(
-        model=model,
-        model_parameters=model.parameters(),
-        training_data=dataset,
-        config="ds_config.json"  # just pass path directly
-    )
+        self.device = self.model_engine.device
 
-    for epoch in range(2):
-        for step, (x, y) in enumerate(train_loader):
-            x = x.to(model_engine.device)
-            y = y.to(model_engine.device)
+    def epoch(self, epoch: int):
+        self.model_engine.train()
 
-            outputs = model_engine(x)
-            loss = loss_fn(outputs, y)
+        for step, batch in enumerate(self.train_dataloader):
+            inputs = batch["inputs"].to(self.device)
+            labels = batch["labels"].to(self.device)
 
-            model_engine.backward(loss)
-            model_engine.step()
+            outputs = self.model_engine(inputs)
+            loss = self.loss_fn(outputs, labels)
 
-            if model_engine.global_rank == 0:
-                print(f"[Epoch {epoch} Step {step}] Loss: {loss.item():.4f}")
-
-if __name__ == "__main__":
-    main()
+            self.model_engine.backward(loss)
+            self.model_engine.step()
+            
+            # if self.model_engine.global_rank == 0:
+            #     print(f"[Epoch {epoch} Step {step}] Loss: {loss.item():.4f}")
+    
+    def train(self, epochs: int):
+        for epoch in range(epochs):
+            self.epoch(epoch)

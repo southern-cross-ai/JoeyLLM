@@ -2,6 +2,5 @@ defaults:
   - model: joey_12
   - data: DataLoader
   - train: 1GPU
-  - wandb: 1GPU
   - _self_
 
