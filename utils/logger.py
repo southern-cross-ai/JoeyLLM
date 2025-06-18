@@ -1,20 +1,28 @@
+import os
 import torch.distributed as dist
 import wandb
 from tqdm import tqdm
 
 class Monitor:
-    def __init__(self, project=None, run_name=None, config=None):
+    def __init__(self, wandb_mode="online", project=None, run_name=None, config=None):
         self.rank = self._get_rank()
         self.is_main = self.rank == 0
-
+        self.wandb_mode = wandb_mode.lower()
         self.wandb_run = None
+
         if self.is_main:
-            self.wandb_run = wandb.init(
-                project=project,
-                name=run_name,
-                config=config,
-                reinit=True
-            )
+            if self.wandb_mode not in {"online", "offline", "disabled"}:
+                raise ValueError("wandb_mode must be 'online', 'offline', or 'disabled'")
+
+            os.environ["WANDB_MODE"] = self.wandb_mode
+
+            if self.wandb_mode != "disabled":
+                self.wandb_run = wandb.init(
+                    project=project,
+                    name=run_name,
+                    config=config,
+                    reinit=True
+                )
 
     def _get_rank(self):
         if dist.is_available() and dist.is_initialized():
