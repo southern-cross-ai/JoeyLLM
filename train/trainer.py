@@ -38,9 +38,6 @@ class Trainer():
 
             self.model_engine.backward(loss)
             self.model_engine.step()
-            
-            # if self.model_engine.global_rank == 0:
-            #     print(f"[Epoch {epoch} Step {step}] Loss: {loss.item():.4f}")
     
     def train(self, epochs: int):
         for epoch in range(epochs):
