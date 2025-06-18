@@ -3,7 +3,7 @@ import hydra
 import torch
 from omegaconf import DictConfig, OmegaConf
 from model import JoeyLLM
-from data import get_dataloader
+from data.dataset import get_dataset 
 # from train.trainer import Trainer
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
@@ -12,7 +12,7 @@ def main(cfg: DictConfig):
         print("✅ Loaded Config:")
 
         print("📦 Loaded Dataset...")
-        dataloader = get_dataloader(
+        dataset= get_dataset(
             data_path=cfg.data.data_path,
             chunk_size=cfg.data.chunk_size
         )

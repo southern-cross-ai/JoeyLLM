@@ -36,7 +36,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
 
                 token_buffer = token_buffer[self.chunk_size:]
 
-def get_dataloader(data_path, chunk_size):
+def get_dataset(data_path, chunk_size):
     tokenizer = AutoTokenizer.from_pretrained(
         "SouthernCrossAI/JoeyLLM_Tokenizer", use_fast=True
     )
