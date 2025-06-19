@@ -1,5 +1,5 @@
 # Use Ubuntu 24.04 for stability
-FROM ubuntu:24.04
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
 
 # Set environment variable for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv \
     python3-dev \
     openssh-client \
+    ca-certificates \
+    libnvidia-ml-dev \
     git-lfs \
     && rm -rf /var/lib/apt/lists/*  
 
