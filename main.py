@@ -1,62 +1,121 @@
+import os
 import hydra
+import torch
 from omegaconf import DictConfig, OmegaConf
-import wandb
 from model import JoeyLLM
-from data import Dataloaders
-from train import OneGPUTrainer
-
+from data import get_dataloader
+from utils.logger import wandbLogger
+from utils.scheduler import LossAdaptiveWarmupScheduler
+from train.trainer import Trainer
+from utils.distributed import init_distributed, cleanup_distributed
+from transformers import get_cosine_schedule_with_warmup
 
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(cfg: DictConfig):
-    print("✅ Loaded Config:")
+    rank, world_size, local_rank = init_distributed()
 
-    
-    wandb.init(
-        project=cfg.WandB.project,
-        name=f"train-{wandb.util.generate_id()}",
-        config=OmegaConf.to_container(cfg, resolve=True)
-    )
+    try:
+        if rank == 0:
+            print("✅ Loaded Config:")
 
-    print("📦 Loading Dataset...")
-    train_loader, val_loader, _ = Dataloaders(
-        cfg.data.dataset_in,
-        cfg.data.batch_size,
-        cfg.data.columns,
-        cfg.data.shuffle,
-    )
+        wandbLogger.set_mode(cfg.wandb.mode)
 
-    print("🧠 Initializing Model...")
-    model = JoeyLLM(
-        vocab_size=cfg.model.vocab_size,
-        max_seq_len=cfg.model.max_seq_len,
-        embed_dim=cfg.model.embed_dim,
-        num_layers=cfg.model.num_layers,
-        num_heads=cfg.model.num_heads,
-        dropout=cfg.model.dropout,
-    )
-    
-    wandb.watch(model, log="all", log_freq=10)
-    
-    print("🚀 Launching Trainer...")
-    trainer = OneGPUTrainer(
-        model=model,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        learning_rate=cfg.train.learning_rate,
-        weight_decay=cfg.train.weight_decay,
-        gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,
-        gradient_clip_norm=cfg.train.gradient_clip_norm,
-        epochs=cfg.train.epochs,
-        # checkpoint_path=cfg.train.checkpoint_path,
-        # resume_from=cfg.train.resume_from,
-        # save_every=cfg.train.save_every,
-    )
-    
-    trainer.fit()
+        device = torch.device(f"cuda:{local_rank}")
+        
+        logger = None
+        if rank == 0:
+            logger = wandbLogger(
+                project_name=cfg.wandb.project,
+                config=OmegaConf.to_container(cfg, resolve=True)
+            )
+        if rank == 0:
+            print("📦 Loading Dataset...")
+        
+        dataloader = get_dataloader(
+            data_path=cfg.data.data_path,
+            chunk_size=cfg.data.chunk_size,
+            buffer_text_size=cfg.data.buffer_text_size,
+            batch_size=cfg.data.batch_size,
+            num_workers=cfg.data.num_workers,
+            world_size=world_size,
+            rank=rank
+        )
+        if rank == 0:
+            print("🧠 Initializing Model...")
+        
+        
+        model = JoeyLLM(
+            vocab_size=cfg.model.vocab_size,
+            max_seq_len=cfg.model.max_seq_len,
+            embed_dim=cfg.model.embed_dim,
+            num_layers=cfg.model.num_layers,
+            num_heads=cfg.model.num_heads,
+            dropout=cfg.model.dropout,
+        ).to(device)
 
-    wandb.finish()
+        
+        if rank == 0:
+            print("📈 Loading Optimizer")
 
-    print("✅ Training Done!")
+        if world_size > 1:
+            model = torch.nn.parallel.DistributedDataParallel(
+                model,
+                device_ids=[local_rank] if torch.cuda.is_available() else None,
+            )
+
+        optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
+
+        # scheduler = LossAdaptiveWarmupScheduler(
+        #     optimizer,
+        #     init_lr=2e-4,
+        #     warmup_steps=1000,
+        #     decay_factor=0.8,
+        #     patience=5,
+        #     window_size=1500
+        # )
+
+        scheduler = LossAdaptiveWarmupScheduler(
+            optimizer=optimizer,
+            init_lr=2e-4,
+            warmup_steps=2000,        # ~1.3% of total
+            decay_factor=0.8,
+            patience=5,
+            threshold=2e-4,
+            window_size=1000,         # Better balance between sensitivity and smoothness
+            min_lr=1e-6               # Optional but highly recommended
+        )
+
+        if logger:
+            logger.watch_model(model, log="all", log_freq=10000)
+
+        if rank == 0:
+            print("🚀 Launching Trainer...")
+
+        trainer = Trainer(
+            model=model,
+            dataloader=dataloader,
+            optimizer=optimizer,
+            logger=logger,
+            scheduler=scheduler,
+            device=device,
+            rank=rank
+        )
+
+        trainer.fit(num_epochs=1, resume_from_latest=True)
+
+
+        if rank == 0:
+            print("🏁 Training complete!")
+
+        if logger:
+            logger.finish()
+
+    finally:
+        if world_size > 1:
+            cleanup_distributed()
+
+        if rank == 0:
+            print("✅ Done!")
 
 
 if __name__ == "__main__":

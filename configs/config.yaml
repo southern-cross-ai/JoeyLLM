@@ -1,7 +1,7 @@
 defaults:
   - model: joey_12
-  - data: gutenberg_au
+  - data: DataLoader
   - train: 1GPU
-  - WandB: 1GPU
+  - wandb: 1GPU
   - _self_
 
