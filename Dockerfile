@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install bash-completion and VS Code Server
 RUN apt-get update && \
     apt-get install -y bash-completion && \
-    curl -fsSL https://code-server.dev/install.sh | sh -s -- --edge && \
+    curl -fsSL https://code-server.dev/install.sh | sh && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add vscode user (no sudo)
