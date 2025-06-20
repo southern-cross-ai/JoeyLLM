@@ -1,5 +1,5 @@
 # Use Ubuntu 24.04 for stability
-FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 
 # Set environment variable for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
