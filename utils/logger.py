@@ -1,64 +1,73 @@
+# from tqdm import tqdm
+
 import os
-import torch.distributed as dist
-import wandb
-from tqdm import tqdm
-
 class Monitor:
-    def __init__(self, wandb_mode="online", project=None, run_name=None, config=None):
-        self.rank = self._get_rank()
+    def __init__(
+        self, 
+        wandb_mode="online", 
+        project="JoeyLLM", 
+        run_name=None, 
+        ):
+        
+        # Set Rank
+        self.rank = int(os.getenv("LOCAL_RANK", 0))
         self.is_main = self.rank == 0
+
+        
+        # Set WandB
         self.wandb_mode = wandb_mode.lower()
-        self.wandb_run = None
-
+        self.project = project
+        self.run_name = run_name
+        self.wandb_run = None 
         if self.is_main:
-            if self.wandb_mode not in {"online", "offline", "disabled"}:
-                raise ValueError("wandb_mode must be 'online', 'offline', or 'disabled'")
-
             os.environ["WANDB_MODE"] = self.wandb_mode
 
-            if self.wandb_mode != "disabled":
+    def wb(self, command, **kwargs):
+        if self.is_main and self.wandb_mode != "disabled":
+            import wandb             
+            
+            if command == "on": 
                 self.wandb_run = wandb.init(
-                    project=project,
-                    name=run_name,
-                    config=config,
+                    project=self.project,
+                    name=self.run_name,
+                    config=kwargs.get("config"),
                     reinit=True
-                )
+                ) 
+            
+            elif command == "model":
+                if kwargs.get("model") is None:
+                    raise ValueError("WandB is missing the model object")
+                wandb.watch(kwargs["model"], 
+                            log=kwargs.get("log", "gradients"), 
+                            log_freq=kwargs.get("log_freq", 1000))
+            
+            elif command == "log":
+                if not isinstance(kwargs.get("metrics"), dict):
+                    raise ValueError("Did not get the logs, please check")
+                wandb.log(kwargs.get("metrics"), step=kwargs.get("step"))
 
-    def _get_rank(self):
-        if dist.is_available() and dist.is_initialized():
-            return dist.get_rank()
-        return 0
+            elif command == "off":
+                wandb.finish()
+
+            else:
+                raise ValueError(f"Unknown wandb command: {command}")
 
     def print(self, message: str):
         if self.is_main:
             print(message)
+    
 
-    def wb(self, command, **kwargs):
-        if not self.is_main:
-            return
 
-        if command == "log":
-            wandb.log(kwargs.get("data", {}), step=kwargs.get("step"))
-        elif command == "start":
-            model = kwargs.get("model")
-            if model:
-                wandb.watch(model, log=kwargs.get("log", "gradients"), log_freq=kwargs.get("log_freq", 100))
-        elif command == "finish":
-            wandb.finish()
-        elif command == "save":
-            path = kwargs.get("path")
-            if path:
-                wandb.save(path)
-        else:
-            raise ValueError(f"Unknown wandb command: {command}")
 
-    def bar(self, mode, iterator, **kwargs):
-        if not self.is_main:
-            return iterator
 
-        if mode == "epoch":
-            return tqdm(iterator, leave=True, position=0, dynamic_ncols=True, **kwargs)
-        elif mode == "step":
-            return tqdm(iterator, leave=False, position=1, dynamic_ncols=True, **kwargs)
-        else:
-            return tqdm(iterator, **kwargs)
+
+#     # def bar(self, mode, iterator, **kwargs):
+#     #     if not self.is_main:
+#     #         return iterator
+
+#     #     if mode == "epoch":
+#     #         return tqdm(iterator, leave=True, position=0, dynamic_ncols=True, **kwargs)
+#     #     elif mode == "step":
+#     #         return tqdm(iterator, leave=False, position=1, dynamic_ncols=True, **kwargs)
+#     #     else:
+#     #         return tqdm(iterator, **kwargs)

@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 from torch.nn import Module, CrossEntropyLoss
+from typing import Any
 import deepspeed
 
 class Trainer():
@@ -8,15 +9,17 @@ class Trainer():
         self, 
         model: Module, 
         dataset: Dataset, 
-        logger, 
-        config_path : str ="utils/deepspeed_config.json"
+        logger: Any, 
+        config_path : str ="train/deepspeed_config.json"
     ):
         
         self.model = model
         self.dataset = dataset
         self.logger = logger
         self.loss_fn = CrossEntropyLoss()
-        
+
+        self.logger.print("🟢 Training Starting")
+
         self.model_engine, self.optimizer, self.train_dataloader, self.scheduler = deepspeed.initialize(
             model=model,
             model_parameters=model.parameters(),
@@ -25,6 +28,7 @@ class Trainer():
             )
         
         self.device = self.model_engine.device
+
 
     def epoch(self, epoch: int):
         self.model_engine.train()

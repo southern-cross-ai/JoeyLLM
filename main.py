@@ -1,41 +1,45 @@
 import os
-import hydra
 import torch
-from omegaconf import DictConfig, OmegaConf
 from model import JoeyLLM
 from data.dataset import get_dataset 
-# from train.trainer import Trainer
+from train.trainer import Trainer
+from utils.logger import Monitor
 
-@hydra.main(config_path="configs", config_name="config", version_base=None)
-def main(cfg: DictConfig):
+def main():
+    r0 = Monitor()    
 
-        print("✅ Loaded Config:")
+    r0.wb("on")
 
-        print("📦 Loaded Dataset...")
-        dataset= get_dataset(
-            data_path=cfg.data.data_path,
-            chunk_size=cfg.data.chunk_size
-        )
-        
-        print("🧠 Initializing Model...")
-        model = JoeyLLM(
-            vocab_size=cfg.model.vocab_size,
-            max_seq_len=cfg.model.max_seq_len,
-            embed_dim=cfg.model.embed_dim,
-            num_layers=cfg.model.num_layers,
-            num_heads=cfg.model.num_heads,
-            dropout=cfg.model.dropout,
-        )
+    r0.print("✅ Loaded Config:")
 
-        # print("🚀 Launching Trainer...")
-        # trainer = Trainer(
-        #     model=model,
-        #     dataloader=dataloader,
-        #     logger=logger,
-        # )
+    r0.print("📦 Loaded Dataset...")
+    dataset= get_dataset(
+        data_path="sample/10BT",
+        chunk_size=512
+    )
+    
+    r0.print("🧠 Initializing Model...")
+    model = JoeyLLM(
+        vocab_size=100256,
+        max_seq_len=512,
+        embed_dim=768,
+        num_layers=12,
+        num_heads=12,
+        dropout=0.1,
+    )
 
-        # print("🏁 Training complete!")
+    r0.wb("model", model=model)
 
+    r0.print("🚀 Launching Trainer...")
+    trainer = Trainer(
+        model=model,
+        dataset=dataset,
+        logger=r0,
+    )
+
+    r0.print("🏁 Training complete!")
+
+    r0.wb("off")
 
 if __name__ == "__main__":
     main()

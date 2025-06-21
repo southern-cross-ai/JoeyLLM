@@ -1,4 +1,0 @@
-data_path: "sample/10BT"
-chunk_size: 51
-batch_size: 32
-num_workers: 3

@@ -1,7 +1,0 @@
-name: "Joeyllm"
-vocab_size: 100256
-max_seq_len: 512 
-embed_dim: 768
-num_heads: 12
-num_layers: 12 
-dropout: 0.1
