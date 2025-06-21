@@ -9,7 +9,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
         self.tokenizer = tokenizer
         self.chunk_size = chunk_size
         self.buffer_text_size = buffer_text_size
-        
+
     def __iter__(self):
         buffer = []
         token_buffer = []
@@ -48,7 +48,8 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
                 return_token_type_ids=False,
             )["input_ids"]
             token_buffer.extend(tokenized)
-        
+
+
         while len(token_buffer) >= self.chunk_size + 1:
             input_ids = token_buffer[:self.chunk_size]
             target_ids = token_buffer[1:self.chunk_size + 1]
@@ -60,7 +61,7 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
 
             token_buffer = token_buffer[self.chunk_size:]
 
-def get_dataset(
+def get_dataloader(
     data_path, 
     chunk_size, 
     buffer_text_size, 
@@ -90,4 +91,11 @@ def get_dataset(
         buffer_text_size=buffer_text_size
     )
 
-    return token_dataset
+    dataloader = DataLoader(
+        token_dataset,
+        batch_size=batch_size,More actions
+        num_workers=num_workers,
+        pin_memory=True,
+    )
+
+    return dataloader
