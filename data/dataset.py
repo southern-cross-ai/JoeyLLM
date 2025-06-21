@@ -67,7 +67,6 @@ def get_dataloader(
     buffer_text_size, 
     batch_size, 
     num_workers,
-    world_size: int = 1, rank: int = 0
     ):
 
     tokenizer = AutoTokenizer.from_pretrained("SouthernCrossAI/JoeyLLM_Tokenizer", use_fast=True)
@@ -81,9 +80,6 @@ def get_dataloader(
         streaming=True
     ).shuffle(buffer_size=buffer_size)
 
-    if world_size > 1:
-        dataset = dataset.shard(num_shards=world_size, index=rank)
-
     token_dataset = BufferedStreamTokenChunkDataset(
         hf_streaming_dataset=dataset,
         tokenizer=tokenizer,
@@ -93,7 +89,7 @@ def get_dataloader(
 
     dataloader = DataLoader(
         token_dataset,
-        batch_size=batch_size,More actions
+        batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=True,
     )
