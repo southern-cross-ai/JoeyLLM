@@ -29,8 +29,6 @@ def main(rank, world_size):
     
     r0.print("✅ Loaded Config:")
 
-
-        
     r0.print("📦 Loading Dataset...")
         
     # dataloader = get_dataloader(
@@ -45,7 +43,6 @@ def main(rank, world_size):
         
     r0.print("🧠 Initializing Model...")
         
-        
     # model = JoeyLLM(
     #     vocab_size=cfg.model.vocab_size,
     #     max_seq_len=cfg.model.max_seq_len,
@@ -54,7 +51,6 @@ def main(rank, world_size):
     #     num_heads=cfg.model.num_heads,
     #     dropout=cfg.model.dropout,
     # ).to(device)
-
         
     r0.print("📈 Loading Optimizer")
 
@@ -77,7 +73,6 @@ def main(rank, world_size):
 
     # logger.watch_model(model, log="all", log_freq=10000)
 
-
     r0.print("🚀 Launching Trainer...")
 
     # trainer = Trainer(
@@ -92,7 +87,6 @@ def main(rank, world_size):
 
     #     trainer.fit(num_epochs=1, resume_from_latest=True)
 
-
     r0.print("🏁 Training complete!")
 
     # logger.finish()
@@ -100,11 +94,8 @@ def main(rank, world_size):
     dist.destroy_process_group()
     r0.print("✅ Done")
 
-
 if __name__ == "__main__":
     world_size = torch.cuda.device_count()
-    
-    
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = "29500"
     os.environ["WORLD_SIZE"] = str(world_size)
