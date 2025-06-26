@@ -76,6 +76,7 @@ def main(rank, world_size):
         logger=r0,
         rank=rank,
         world_size=world_size,
+        total_steps=464652,
     )
 
     trainer.train(epochs=1)

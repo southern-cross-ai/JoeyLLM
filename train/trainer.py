@@ -2,7 +2,9 @@ import torch
 from torch.utils.data import DataLoader
 from torch.nn import Module, CrossEntropyLoss
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.optim.lr_scheduler import OneCycleLR
 from typing import Any
+
 
 class Trainer:
     def __init__(
@@ -13,6 +15,7 @@ class Trainer:
         logger: Any,
         rank: int,
         world_size: int,
+        total_steps: int,
         device: torch.device = None,
     ):
         self.rank = rank
@@ -27,6 +30,21 @@ class Trainer:
         self.dataloader = dataloader
         self.logger = logger
         self.loss_fn = CrossEntropyLoss()
+
+        # Set up OneCycleLR
+        self.scheduler = OneCycleLR(
+            self.optimizer,
+            max_lr=1e-3,
+            total_steps=total_steps,
+            pct_start=0.03,
+            anneal_strategy='cos',
+            div_factor=25.0,
+            final_div_factor=1e4,
+            cycle_momentum=True,
+            base_momentum=0.85,
+            max_momentum=0.95,
+            three_phase=False
+        )
 
         self.logger.print(f"🟢 Training Starting on rank {rank}")
 
@@ -47,8 +65,10 @@ class Trainer:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            self.scheduler.step()  # 🔑 Scheduler updates every batch
 
-            self.logger.print(f"📝 Epoch [{epoch}] Step [{step}] Loss: {loss.item():.4f}")
+            if step % 10 == 0:
+                self.logger.print(f"📝 Epoch [{epoch}] Step [{step}] Loss: {loss.item():.4f}")
 
     def train(self, epochs: int):
         for epoch in range(epochs):
