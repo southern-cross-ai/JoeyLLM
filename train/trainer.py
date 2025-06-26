@@ -30,6 +30,7 @@ class Trainer:
         self.dataloader = dataloader
         self.logger = logger
         self.loss_fn = CrossEntropyLoss()
+        self.global_step = 0
 
         # Set up OneCycleLR
         self.scheduler = OneCycleLR(
@@ -62,13 +63,23 @@ class Trainer:
                 labels.view(-1)                      # [B*T]
             )
 
-            self.optimizer.zero_grad()
+            self.optimizer.zero_grad(set_to_none=True)
             loss.backward()
             self.optimizer.step()
             self.scheduler.step()  # 🔑 Scheduler updates every batch
+            lr = self.optimizer.param_groups[0]["lr"]
 
-            if step % 10 == 0:
-                self.logger.print(f"📝 Epoch [{epoch}] Step [{step}] Loss: {loss.item():.4f}")
+
+            if step % 10 == 0 and self.logger.is_main:
+                self.logger.print(f"📝 Epoch {epoch} Step {step} Loss: {loss.item():.4f} LR: {lr:.6f}")
+                self.logger.wb(
+                    "log",
+                    metrics={"train/loss": loss.item(), "train/lr": lr},
+                    step=self.global_step
+                )
+
+            self.global_step += 1
+
 
     def train(self, epochs: int):
         for epoch in range(epochs):
