@@ -6,7 +6,7 @@ import torch.distributed as dist
 from utils.logger import Monitor
 from model.joeyllm import JoeyLLM
 from data.dataset import get_dataloader
-
+from train.trainer import Trainer
 
 def main(rank, world_size):
 
@@ -68,6 +68,17 @@ def main(rank, world_size):
     r0.wb("model", model=model, log="gradients", log_freq=1000)
 
     r0.print("🚀 Launching Trainer...")
+
+    trainer = Trainer(
+        model=model,
+        dataloader=dataloader,
+        optimizer=optimizer,
+        logger=r0,
+        rank=rank,
+        world_size=world_size,
+    )
+
+    trainer.train(epochs=1)
 
     #     trainer.fit(num_epochs=1, resume_from_latest=True)
 
