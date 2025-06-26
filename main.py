@@ -65,13 +65,9 @@ def main(rank, world_size):
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
-
-
-    # logger.watch_model(model, log="all", log_freq=10000)
+    r0.wb("model", model=model, log="gradients", log_freq=1000)
 
     r0.print("🚀 Launching Trainer...")
-
-
 
     #     trainer.fit(num_epochs=1, resume_from_latest=True)
 
