@@ -4,6 +4,9 @@ import torch.multiprocessing as mp
 import torch.distributed as dist
 
 from utils.logger import Monitor
+from model.joeyllm import JoeyLLM
+from data.dataset import get_dataloader
+
 
 def main(rank, world_size):
 
@@ -19,77 +22,62 @@ def main(rank, world_size):
     dist.init_process_group(backend="nccl", init_method="env://")
     
     r0 = Monitor(
-        wandb_mode="disabled",  # or "offline", or "disabled"
+        wandb_mode="offline",  # "online", "offline", or "disabled"
         project="JoeyLLM",
         run_name="exp1"
     )
  
+    r0.wb('on')
+
     torch.cuda.set_device(rank)
     device = torch.device(f"cuda:{rank}")
     
-    r0.print("✅ Loaded Config:")
+    print(f'🎖️ Rank: {rank}')
+    r0.print(f'🌍 World Size (GPUs): {world_size}')
+    
+    r0.print("✅ Loaded Config...")
 
     r0.print("📦 Loading Dataset...")
         
-    # dataloader = get_dataloader(
-    #     data_path=cfg.data.data_path,
-    #     chunk_size=cfg.data.chunk_size,
-    #     buffer_text_size=cfg.data.buffer_text_size,
-    #     batch_size=cfg.data.batch_size,
-    #     num_workers=cfg.data.num_workers,
-    #     world_size=world_size,
-    #     rank=rank
-    # )
+    dataloader = get_dataloader(
+        data_path="sample/10BT",
+        chunk_size=512,
+        buffer_text_size=1000,
+        batch_size=32,
+        num_workers=2,
+        world_size=world_size,
+        rank=rank
+    )
         
     r0.print("🧠 Initializing Model...")
         
-    # model = JoeyLLM(
-    #     vocab_size=cfg.model.vocab_size,
-    #     max_seq_len=cfg.model.max_seq_len,
-    #     embed_dim=cfg.model.embed_dim,
-    #     num_layers=cfg.model.num_layers,
-    #     num_heads=cfg.model.num_heads,
-    #     dropout=cfg.model.dropout,
-    # ).to(device)
-        
+    model = JoeyLLM(
+        vocab_size=100,
+        max_seq_len=512,
+        embed_dim=768,
+        num_layers=12,
+        num_heads=12,
+        dropout=0.1,
+        ).to(device)
+         
     r0.print("📈 Loading Optimizer")
 
-    #     if world_size > 1:
-    #         model = torch.nn.parallel.DistributedDataParallel(
-    #             model,
-    #             device_ids=[local_rank] if torch.cuda.is_available() else None,
-    #         )
 
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
 
-    # scheduler = LossAdaptiveWarmupScheduler(
-    #     optimizer,
-    #     init_lr=2e-4,
-    #     warmup_steps=1000,
-    #     decay_factor=0.8,
-    #     patience=5,
-    #     window_size=1500
-    # )
+
 
     # logger.watch_model(model, log="all", log_freq=10000)
 
     r0.print("🚀 Launching Trainer...")
 
-    # trainer = Trainer(
-    #     model=model,
-    #     dataloader=dataloader,
-    #     optimizer=optimizer,
-    #     logger=logger,
-    #     scheduler=scheduler,
-    #     device=device,
-    #     rank=rank
-    # )
+
 
     #     trainer.fit(num_epochs=1, resume_from_latest=True)
 
     r0.print("🏁 Training complete!")
 
-    # logger.finish()
+    r0.wb("off")
 
     dist.destroy_process_group()
     r0.print("✅ Done")
