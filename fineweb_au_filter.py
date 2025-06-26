@@ -36,6 +36,18 @@ def extract_domain(url: str) -> str:
         return urlparse(url).netloc.lower().replace("www.", "").split(":")[0]
     except:
         return ""
+    
+def mentions_au_path(url: str) -> bool:
+    try:
+        path = urlparse(url).path.lower()
+        return (
+            "/au/" in path or
+            path.endswith("/au") or
+            "/en-au/" in path or
+            path.endswith("/en-au")
+        )
+    except:
+        return False
 
 def is_au_domain(domain: str) -> bool:
     return domain.endswith(".au")
@@ -68,6 +80,8 @@ def filter_au_rows(df: pd.DataFrame, use_whois=True, max_whois=100):
             continue
 
         if is_au_domain(domain):
+            results.append(row)
+        elif mentions_au_path(url):
             results.append(row)
         elif use_whois and whois_checked < max_whois:
             whois_checked += 1
