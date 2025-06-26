@@ -42,9 +42,9 @@ def main(rank, world_size):
     dataloader = get_dataloader(
         data_path="sample/10BT",
         chunk_size=512,
-        buffer_text_size=1000,
-        batch_size=2,
-        num_workers=2,
+        buffer_text_size=5000,
+        batch_size=32,
+        num_workers=3,
         world_size=world_size,
         rank=rank
     )
