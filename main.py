@@ -43,7 +43,7 @@ def main(rank, world_size):
         data_path="sample/10BT",
         chunk_size=512,
         buffer_text_size=1000,
-        batch_size=32,
+        batch_size=2,
         num_workers=2,
         world_size=world_size,
         rank=rank
@@ -52,7 +52,7 @@ def main(rank, world_size):
     r0.print("🧠 Initializing Model...")
         
     model = JoeyLLM(
-        vocab_size=100,
+        vocab_size=32000,
         max_seq_len=512,
         embed_dim=768,
         num_layers=12,

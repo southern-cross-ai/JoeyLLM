@@ -48,7 +48,7 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
 
-            self.logger.print(f"📝 Epoch [{epoch}] Step [{step}] Loss: {loss.item():.4f}")
+            self.logger.print(f"📝 Epoch [{epoch}] Step [{step}] Loss: {loss.item():.4f}", flush=True)
 
     def train(self, epochs: int):
         for epoch in range(epochs):
