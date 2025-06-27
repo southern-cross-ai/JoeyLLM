@@ -43,7 +43,7 @@ class Trainer:
             self.optimizer,
             max_lr=1e-3,
             total_steps=total_steps,
-            pct_start=0.03,
+            pct_start=0.01,
             anneal_strategy='cos',
             div_factor=25.0,
             final_div_factor=1e4,

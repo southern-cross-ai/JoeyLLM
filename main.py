@@ -25,7 +25,7 @@ def main(rank, world_size):
     r0 = Monitor(
         wandb_mode="online",  # "online", "offline", or "disabled"
         project="JoeyLLM",
-        run_name="exp1"
+        run_name="FridayTest"
     )
  
     # Start Wandb and print World Size and Rank 
