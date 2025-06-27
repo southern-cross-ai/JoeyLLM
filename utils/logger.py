@@ -26,7 +26,7 @@ class Monitor:
         if self.is_main and self.wandb_mode != "disabled":
             import wandb             
             
-            if command == "on": 
+            if command == "start": 
                 self.wandb_run = wandb.init(
                     project=self.project,
                     name=self.run_name,
@@ -46,7 +46,7 @@ class Monitor:
                     raise ValueError("Did not get the logs, please check")
                 wandb.log(kwargs.get("metrics"), step=kwargs.get("step"))
 
-            elif command == "off":
+            elif command == "Stop":
                 wandb.finish()
 
             else:
