@@ -82,7 +82,7 @@ def main(rank, world_size):
     r0.print("🏁 Training complete!")
 
     # Turn off wandb
-    r0.wb("off")
+    r0.wb("Stop")
 
     # Stop this and all Process 
     dist.destroy_process_group()

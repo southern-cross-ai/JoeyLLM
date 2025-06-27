@@ -26,7 +26,7 @@ class Monitor:
         if self.is_main and self.wandb_mode != "disabled":
             import wandb             
             
-            if command == "start": 
+            if command == "Start": 
                 self.wandb_run = wandb.init(
                     project=self.project,
                     name=self.run_name,
