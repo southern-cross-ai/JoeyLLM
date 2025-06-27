@@ -4,6 +4,8 @@ from torch.nn import Module, CrossEntropyLoss
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim.lr_scheduler import OneCycleLR
 from typing import Any
+from torch.amp import GradScaler, autocast
+
 
 
 class Trainer:
@@ -32,6 +34,10 @@ class Trainer:
         self.loss_fn = CrossEntropyLoss()
         self.global_step = 0
 
+        # Mixed precision
+        self.scaler = GradScaler()
+
+
         # Set up OneCycleLR
         self.scheduler = OneCycleLR(
             self.optimizer,
@@ -44,7 +50,7 @@ class Trainer:
             cycle_momentum=True,
             base_momentum=0.85,
             max_momentum=0.95,
-            three_phase=False
+            three_phase=False,
         )
 
         self.logger.print(f"🟢 Training Starting on rank {rank}")
@@ -55,20 +61,26 @@ class Trainer:
         for step, batch in enumerate(self.dataloader):
             inputs = batch["inputs"].to(self.device, non_blocking=True)
             labels = batch["labels"].to(self.device, non_blocking=True)
-
-            outputs = self.model(inputs)
-
-            loss = self.loss_fn(
-                outputs.view(-1, outputs.size(-1)),  # [B*T, V]
-                labels.view(-1)                      # [B*T]
-            )
-
+            
             self.optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            self.optimizer.step()
-            self.scheduler.step()  # 🔑 Scheduler updates every batch
-            lr = self.optimizer.param_groups[0]["lr"]
+            
+            with autocast('cuda'): 
+                outputs = self.model(inputs)
+                
+                loss = self.loss_fn(
+                    outputs.view(-1, outputs.size(-1)),  # [B*T, V]
+                    labels.view(-1)                      # [B*T]
+            )
+            
+            self.scaler.scale(loss).backward()
+            
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+            if self.global_step > 0:
+                self.scheduler.step()
 
+
+            lr = self.optimizer.param_groups[0]["lr"]
 
             if step % 10 == 0 and self.logger.is_main:
                 self.logger.print(f"📝 Epoch {epoch} Step {step} Loss: {loss.item():.4f} LR: {lr:.6f}")
