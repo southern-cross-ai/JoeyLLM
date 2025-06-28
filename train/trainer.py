@@ -6,8 +6,6 @@ from torch.optim.lr_scheduler import OneCycleLR
 from typing import Any
 from torch.amp import GradScaler, autocast
 
-
-
 class Trainer:
     def __init__(
         self,
@@ -33,10 +31,10 @@ class Trainer:
         self.logger = logger
         self.loss_fn = CrossEntropyLoss()
         self.global_step = 0
+        self.accumulation_steps = 4
 
         # Mixed precision
         self.scaler = GradScaler()
-
 
         # Set up OneCycleLR
         self.scheduler = OneCycleLR(
@@ -62,7 +60,8 @@ class Trainer:
             inputs = batch["inputs"].to(self.device, non_blocking=True)
             labels = batch["labels"].to(self.device, non_blocking=True)
             
-            self.optimizer.zero_grad(set_to_none=True)
+            if step % self.accumulation_steps == 0:
+                self.optimizer.zero_grad(set_to_none=True)
             
             with autocast('cuda'): 
                 outputs = self.model(inputs)
@@ -71,17 +70,9 @@ class Trainer:
                     outputs.view(-1, outputs.size(-1)),  # [B*T, V]
                     labels.view(-1)                      # [B*T]
             )
-            
-            self.scaler.scale(loss).backward()
-            
-            self.scaler.step(self.optimizer)
-            self.scaler.update()
-            if self.global_step > 0:
-                self.scheduler.step()
-
-
+                
             lr = self.optimizer.param_groups[0]["lr"]
-
+            
             if step % 10 == 0 and self.logger.is_main:
                 self.logger.print(f"📝 Epoch {epoch} Step {step} Loss: {loss.item():.4f} LR: {lr:.6f}")
                 self.logger.wb(
@@ -90,8 +81,16 @@ class Trainer:
                     step=self.global_step
                 )
 
-            self.global_step += 1
+            loss = loss / self.accumulation_steps
 
+            self.scaler.scale(loss).backward()
+            
+            if (step + 1) % self.accumulation_steps == 0:
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+                self.scheduler.step()
+
+            self.global_step += 1
 
     def train(self, epochs: int):
         for epoch in range(epochs):
