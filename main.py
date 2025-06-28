@@ -25,7 +25,7 @@ def main(rank, world_size):
     r0 = Monitor(
         wandb_mode="online",  # "online", "offline", or "disabled"
         project="JoeyLLM",
-        run_name="FridayTest"
+        run_name="SaturdayTest"
     )
  
     # Start Wandb and print World Size and Rank 
@@ -42,7 +42,7 @@ def main(rank, world_size):
         data_path="sample/10BT",
         chunk_size=512,
         buffer_text_size=5000,
-        batch_size=32,
+        batch_size=64,
         num_workers=3,
         world_size=world_size,
         rank=rank
@@ -75,7 +75,7 @@ def main(rank, world_size):
         logger=r0,
         rank=rank,
         world_size=world_size,
-        total_steps=464652,
+        total_steps=125000,
     )
 
     trainer.train(epochs=1)

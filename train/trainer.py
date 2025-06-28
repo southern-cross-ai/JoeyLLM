@@ -53,6 +53,16 @@ class Trainer:
 
         self.logger.print(f"🟢 Training Starting on rank {rank}")
 
+    def save_model(self, path="model/model.pt"):
+        # Save only model weights for inference, overwrite each time
+        if isinstance(self.model, DDP):
+            torch.save(self.model.module.state_dict(), path)
+        else:
+            torch.save(self.model.state_dict(), path)
+        if self.logger.is_main:
+            self.logger.print(f"💾 Model saved to {path}")
+
+
     def epoch(self, epoch: int):
         self.model.train()
 
@@ -73,7 +83,7 @@ class Trainer:
                 
             lr = self.optimizer.param_groups[0]["lr"]
             
-            if step % 10 == 0 and self.logger.is_main:
+            if step % self.accumulation_steps == 0 and self.logger.is_main:
                 self.logger.print(f"📝 Epoch {epoch} Step {step} Loss: {loss.item():.4f} LR: {lr:.6f}")
                 self.logger.wb(
                     "log",
@@ -91,6 +101,10 @@ class Trainer:
                 self.scheduler.step()
 
             self.global_step += 1
+
+            if self.global_step % 1000 == 0 and self.logger.is_main:
+                self.save_model("model/model.pt")
+                self.logger.print("Saving model!!!")
 
     def train(self, epochs: int):
         for epoch in range(epochs):
