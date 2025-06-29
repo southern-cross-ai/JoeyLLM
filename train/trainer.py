@@ -53,7 +53,7 @@ class Trainer:
 
         self.logger.print(f"🟢 Training Starting on rank {rank}")
 
-    def save_model(self, path="model/a100model.pt"):
+    def save_model(self, path="model/a100model2.pt"):
         # Save only model weights for inference, overwrite each time
         if isinstance(self.model, DDP):
             torch.save(self.model.module.state_dict(), path)
@@ -103,7 +103,7 @@ class Trainer:
             self.global_step += 1
 
             if self.global_step % 1000 == 0 and self.logger.is_main:
-                self.save_model("model/a100model.pt")
+                self.save_model("model/a100model2.pt")
                 self.logger.print("Saving model!!!")
 
         # ✅ 🛠️ Final optimizer step for remaining gradients (AFTER loop)
