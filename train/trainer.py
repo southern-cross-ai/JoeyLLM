@@ -39,9 +39,9 @@ class Trainer:
         # Set up OneCycleLR
         self.scheduler = OneCycleLR(
             self.optimizer,
-            max_lr=5e-4,       # changed from 1e-3 to 5e-4
+            max_lr=4e-4,       # changed from 1e-3 to 5e-4
             total_steps=total_steps,
-            pct_start=0.03,
+            pct_start=0.01,
             anneal_strategy='cos',
             div_factor=25.0,
             final_div_factor=1e4,
