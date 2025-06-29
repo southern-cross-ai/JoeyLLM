@@ -78,7 +78,7 @@ def main(rank, world_size):
         total_steps=125000,
     )
 
-    trainer.train(epochs=2)
+    trainer.train(epochs=5)
     r0.print("🏁 Training complete!")
 
     # Turn off wandb
