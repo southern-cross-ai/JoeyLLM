@@ -106,6 +106,14 @@ class Trainer:
                 self.save_model("model/a100model.pt")
                 self.logger.print("Saving model!!!")
 
+        # ✅ 🛠️ Final optimizer step for remaining gradients (AFTER loop)
+        remaining = len(self.dataloader) % self.accumulation_steps
+        if remaining != 0:
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+            self.scheduler.step()
+
+
     def train(self, epochs: int):
         for epoch in range(epochs):
             self.epoch(epoch)
