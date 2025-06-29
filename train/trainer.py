@@ -39,9 +39,9 @@ class Trainer:
         # Set up OneCycleLR
         self.scheduler = OneCycleLR(
             self.optimizer,
-            max_lr=1e-3,
+            max_lr=5e-4,       # changed from 1e-3 to 5e-4
             total_steps=total_steps,
-            pct_start=0.01,
+            pct_start=0.03,
             anneal_strategy='cos',
             div_factor=25.0,
             final_div_factor=1e4,
@@ -53,7 +53,7 @@ class Trainer:
 
         self.logger.print(f"🟢 Training Starting on rank {rank}")
 
-    def save_model(self, path="model/model.pt"):
+    def save_model(self, path="model/a100model.pt"):
         # Save only model weights for inference, overwrite each time
         if isinstance(self.model, DDP):
             torch.save(self.model.module.state_dict(), path)
@@ -103,7 +103,7 @@ class Trainer:
             self.global_step += 1
 
             if self.global_step % 1000 == 0 and self.logger.is_main:
-                self.save_model("model/model.pt")
+                self.save_model("model/a100model.pt")
                 self.logger.print("Saving model!!!")
 
     def train(self, epochs: int):
