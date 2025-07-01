@@ -173,6 +173,7 @@ cython_debug/
 
 wandb.json
 wandb/
+saved/*
 
 # Ignore Vim swap files
 *.swp
