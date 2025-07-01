@@ -8,18 +8,19 @@ from model.joeyllm import JoeyLLM
 from data.dataset import get_dataloader
 from train.trainer import Trainer
 
-def main(rank, world_size):
+def main():
 
     # Per-process setup 
-    os.environ["RANK"] = str(rank)
-    os.environ["LOCAL_RANK"] = str(rank)
+    rank = int(os.environ["RANK"])
+    local_rank = int(os.environ["LOCAL_RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
 
     # Init DDP process group
     dist.init_process_group(backend="nccl", init_method="env://")
 
     # Set Device to GPU 
-    torch.cuda.set_device(rank)
-    device = torch.device(f"cuda:{rank}")
+    torch.cuda.set_device(local_rank)
+    device = torch.device(f"cuda:{local_rank}")
 
     # Set print, wandb, to rank = 0 
     r0 = Monitor(
@@ -75,7 +76,7 @@ def main(rank, world_size):
         logger=r0,
         rank=rank,
         world_size=world_size,
-        total_steps=226000,
+        total_steps=190000,
     )
 
     trainer.train(epochs=5)
@@ -89,11 +90,4 @@ def main(rank, world_size):
     r0.print("✅ Done")
 
 if __name__ == "__main__":
-    # This sets up the environment variables and the port for DDP to communicate
-    world_size = torch.cuda.device_count()
-    os.environ["MASTER_ADDR"] = "localhost"
-    os.environ["MASTER_PORT"] = "29500"
-    os.environ["WORLD_SIZE"] = str(world_size)
-
-    # Launch one process per GPU, each will run main(rank, world_size)
-    mp.spawn(main, args=(world_size,), nprocs=world_size, join=True)
+    main()
