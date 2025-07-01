@@ -8,11 +8,12 @@ from model.joeyllm import JoeyLLM
 from data.dataset import get_dataloader
 from train.trainer import Trainer
 
-def main(rank, world_size):
+def main():
 
     # Per-process setup 
     rank = int(os.environ["RANK"])
     local_rank = int(os.environ["LOCAL_RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
 
     # Init DDP process group
     dist.init_process_group(backend="nccl", init_method="env://")
@@ -89,6 +90,4 @@ def main(rank, world_size):
     r0.print("✅ Done")
 
 if __name__ == "__main__":
-    world_size = int(os.environ["WORLD_SIZE"])
-    rank = int(os.environ["RANK"])
-    main(rank, world_size)
+    main()
