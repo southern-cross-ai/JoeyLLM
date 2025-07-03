@@ -6,7 +6,7 @@ class Monitor:
         self, 
         wandb_mode="online", 
         project="JoeyLLM", 
-        run_name=None, 
+        name=None, 
         ):
         
         # Set Rank
@@ -17,7 +17,7 @@ class Monitor:
         # Set WandB
         self.wandb_mode = wandb_mode.lower()
         self.project = project
-        self.run_name = run_name
+        self.name = name
         self.wandb_run = None 
         if self.is_main:
             os.environ["WANDB_MODE"] = self.wandb_mode
@@ -29,7 +29,7 @@ class Monitor:
             if command == "Start": 
                 self.wandb_run = wandb.init(
                     project=self.project,
-                    name=self.run_name,
+                    name=self.name,
                     config=kwargs.get("config"),
                     resume="allow",  # or "must" or "never"
                 ) 

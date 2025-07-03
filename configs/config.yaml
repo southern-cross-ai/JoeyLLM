@@ -9,54 +9,50 @@ defaults:
 # WandB Config
 # -------------------------------
 
-wandb:
-  name: JoeyLLM
-  run_name: Sunday
-  wandb_mode: online # "online", "offline", or "disabled"
-
-
-process:
-  rank: ${env:RANK,0}
-  local_rank: ${env:LOCAL_RANK,0}
-  world_size: ${env:WORLD_SIZE,1}
+wandbconfig:
+  project: JoeyLLM
+  name: Sunday
+  mode: disabled # "online", "offline", or "disabled"
 
 # -------------------------------
 # Dataset Config
 # -------------------------------
 
-# dataset:
-#   data_path: sample/10BT
-#   chunk_size: 512
-#   buffer_text_size: 8000
-#   batch_size: 16
-#   num_workers: 3
+dataconfig:
+  data_path: sample/10BT
+  chunk_size: 512
+  buffer_text_size: 8000
+  batch_size: 16
+  num_workers: 3
 
 # -------------------------------
 # Model Config
 # -------------------------------
 
-# model:
-#   vocab_size: 32000
-#   max_seq_len: 512
-#   embed_dim: 768
-#   num_layers: 24
-#   num_heads: 16
-#   dropout: 0.1
+modelconfig:
+  vocab_size: 32000
+  max_seq_len: 512
+  embed_dim: 768
+  num_layers: 24
+  num_heads: 16
+  dropout: 0.1
+
 
 # -------------------------------
 # Optimizer Config
 # -------------------------------
 
-# optimizer:
-#   lr: 3e-4
-#   betas: [0.9, 0.95]
-#   weight_decay: 0.1
+optimizerconfig:
+  lr: 3e-4
+  betas: [0.9, 0.95]
+  weight_decay: 0.1
 
 # -------------------------------
 # Trainer Config
 # -------------------------------
 
-# trainer:
-#   total_steps: 226000
-#   epochs: 5
+trainconfig:
+  total_steps: 400000
+  epochs: 5
+
 
