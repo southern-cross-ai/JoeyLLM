@@ -1,122 +1,105 @@
 import os
-import hydra
 import torch
-from omegaconf import DictConfig, OmegaConf
-from model import JoeyLLM
-from data import get_dataloader
-from utils.logger import wandbLogger
-from utils.scheduler import LossAdaptiveWarmupScheduler
+import torch.multiprocessing as mp
+import torch.distributed as dist
+
+import hydra
+from omegaconf import DictConfig
+
+from utils.logger import Monitor
+from model.joeyllm import JoeyLLM
+from data.dataset import get_dataloader
 from train.trainer import Trainer
-from utils.distributed import init_distributed, cleanup_distributed
-from transformers import get_cosine_schedule_with_warmup
+from configs.valid import Config
 
-@hydra.main(config_path="configs", config_name="config", version_base=None)
+@hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(cfg: DictConfig):
-    rank, world_size, local_rank = init_distributed()
 
-    try:
-        if rank == 0:
-            print("✅ Loaded Config:")
+    vcfg = Config(**cfg)
 
-        wandbLogger.set_mode(cfg.wandb.mode)
+    # Per-process setup 
+    rank = int(os.environ["RANK"])
+    local_rank = int(os.environ["LOCAL_RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
 
-        device = torch.device(f"cuda:{local_rank}")
+    # Init DDP process group
+    dist.init_process_group(backend="nccl", init_method="env://")
+
+    # Set Device to GPU 
+    torch.cuda.set_device(local_rank)
+    device = torch.device(f"cuda:{local_rank}")
+
+    # Set print, wandb, to rank = 0 
+    r0 = Monitor(
+        wandb_mode= vcfg.wandbconfig.mode,
+        project=vcfg.wandbconfig.project,
+        name=vcfg.wandbconfig.name
+    )
+ 
+    # Start Wandb and print World Size and Rank 
+    r0.wb('Start')    
+    print(f'🎖️ Rank: {rank}')
+    r0.print(f'🌍 World Size (GPUs): {world_size}')
+    
+    # Todo add configs 
+    r0.print("✅ Configs Loaded...")
+
+    # Load Dataset and Loader
+    r0.print("📦 Loading Dataset...")
+    dataloader = get_dataloader(
+        data_path=vcfg.dataconfig.data_path,
+        chunk_size=vcfg.dataconfig.chunk_size,
+        buffer_text_size=vcfg.dataconfig.buffer_text_size,
+        batch_size=vcfg.dataconfig.batch_size,
+        num_workers=vcfg.dataconfig.num_workers,
+        world_size=world_size,
+        rank=rank
+    )
         
-        logger = None
-        if rank == 0:
-            logger = wandbLogger(
-                project_name=cfg.wandb.project,
-                config=OmegaConf.to_container(cfg, resolve=True)
-            )
-        if rank == 0:
-            print("📦 Loading Dataset...")
-        
-        dataloader = get_dataloader(
-            data_path=cfg.data.data_path,
-            chunk_size=cfg.data.chunk_size,
-            buffer_text_size=cfg.data.buffer_text_size,
-            batch_size=cfg.data.batch_size,
-            num_workers=cfg.data.num_workers,
-            world_size=world_size,
-            rank=rank
-        )
-        if rank == 0:
-            print("🧠 Initializing Model...")
-        
-        
-        model = JoeyLLM(
-            vocab_size=cfg.model.vocab_size,
-            max_seq_len=cfg.model.max_seq_len,
-            embed_dim=cfg.model.embed_dim,
-            num_layers=cfg.model.num_layers,
-            num_heads=cfg.model.num_heads,
-            dropout=cfg.model.dropout,
+    # Load Model
+    r0.print("🧠 Initializing Model...")
+    model = JoeyLLM(
+        vocab_size=vcfg.modelconfig.vocab_size,
+        max_seq_len=vcfg.modelconfig.max_seq_len,
+        embed_dim=vcfg.modelconfig.embed_dim,
+        num_layers=vcfg.modelconfig.num_layers,
+        num_heads=vcfg.modelconfig.num_heads,
+        dropout=vcfg.modelconfig.dropout,
         ).to(device)
 
-        
-        if rank == 0:
-            print("📈 Loading Optimizer")
-
-        if world_size > 1:
-            model = torch.nn.parallel.DistributedDataParallel(
-                model,
-                device_ids=[local_rank] if torch.cuda.is_available() else None,
-            )
-
-        optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9, 0.95), weight_decay=0.1)
-
-        # scheduler = LossAdaptiveWarmupScheduler(
-        #     optimizer,
-        #     init_lr=2e-4,
-        #     warmup_steps=1000,
-        #     decay_factor=0.8,
-        #     patience=5,
-        #     window_size=1500
-        # )
-
-        scheduler = LossAdaptiveWarmupScheduler(
-            optimizer=optimizer,
-            init_lr=2e-4,
-            warmup_steps=2000,        # ~1.3% of total
-            decay_factor=0.8,
-            patience=5,
-            threshold=2e-4,
-            window_size=1000,         # Better balance between sensitivity and smoothness
-            min_lr=1e-6               # Optional but highly recommended
+    # # Load Optimizer     
+    r0.print("📈 Loading Optimizer")
+    optimizer = torch.optim.AdamW(
+        model.parameters(), 
+        lr=vcfg.optimizerconfig.lr, 
+        betas=vcfg.optimizerconfig.betas, 
+        weight_decay=vcfg.optimizerconfig.weight_decay
         )
 
-        if logger:
-            logger.watch_model(model, log="all", log_freq=10000)
+    # Load model info into wandb 
+    r0.wb("model", model=model, log="gradients", log_freq=1000)
 
-        if rank == 0:
-            print("🚀 Launching Trainer...")
+    # Load and start Traner Loop
+    r0.print("🚀 Launching Trainer...")
+    trainer = Trainer(
+        model=model,
+        dataloader=dataloader,
+        optimizer=optimizer,
+        logger=r0,
+        rank=rank,
+        world_size=world_size,
+        total_steps=vcfg.trainconfig.total_steps,
+    )
 
-        trainer = Trainer(
-            model=model,
-            dataloader=dataloader,
-            optimizer=optimizer,
-            logger=logger,
-            scheduler=scheduler,
-            device=device,
-            rank=rank
-        )
+    trainer.train(epochs=vcfg.trainconfig.epochs)
+    r0.print("🏁 Training complete!")
 
-        trainer.fit(num_epochs=1, resume_from_latest=True)
+    # Turn off wandb
+    r0.wb("Stop")
 
-
-        if rank == 0:
-            print("🏁 Training complete!")
-
-        if logger:
-            logger.finish()
-
-    finally:
-        if world_size > 1:
-            cleanup_distributed()
-
-        if rank == 0:
-            print("✅ Done!")
-
+    # Stop this and all Process 
+    dist.destroy_process_group()
+    r0.print("✅ Done")
 
 if __name__ == "__main__":
     main()

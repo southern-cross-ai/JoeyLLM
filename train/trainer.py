@@ -1,204 +1,119 @@
 import torch
-from torch.amp import autocast, GradScaler
-from torchsnapshot import Snapshot, Stateful
-import torch.distributed as dist
-from tqdm import tqdm
-import shutil
-import os
-import glob
+from torch.utils.data import DataLoader
+from torch.nn import Module, CrossEntropyLoss
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.optim.lr_scheduler import OneCycleLR
+from typing import Any
+from torch.amp import GradScaler, autocast
 
-class Trainer(Stateful):
+class Trainer:
     def __init__(
         self,
-        model,
-        dataloader,
-        optimizer,
-        logger,
-        scheduler=None,
-        device="cuda",
-        rank: int = 0
+        model: Module,
+        dataloader: DataLoader,
+        optimizer: torch.optim.Optimizer,
+        logger: Any,
+        rank: int,
+        world_size: int,
+        total_steps: int,
+        device: torch.device = None,
     ):
-        self.model = model.to(device)
-        self.dataloader = dataloader
-        self.optimizer = optimizer
-        self.scheduler = scheduler
-        self.criterion = torch.nn.CrossEntropyLoss()
-        self.logger = logger
-        self.device = device
-        self.scaler = GradScaler(device=self.device)
         self.rank = rank
+        self.world_size = world_size
+        self.device = device or torch.device(f"cuda:{rank}")
+        
+        # Move model to device, then wrap in DDP
+        self.model = model.to(self.device)
+        self.model = DDP(self.model, device_ids=[rank])
+
+        self.optimizer = optimizer
+        self.dataloader = dataloader
+        self.logger = logger
+        self.loss_fn = CrossEntropyLoss()
         self.global_step = 0
-        self.save_interval = 5000  
-        self.retention_limit = 2
-        self.pending_snapshot = None
+        self.accumulation_steps = 4
 
-        self.snapshot_dir = "snapshots"
-        self.snapshot_app_state = {
-            "model": self.model,
-            "optimizer": self.optimizer,
-            "scaler": self.scaler,
-            "trainer": self
-        }
-        if self.scheduler:
-            self.snapshot_app_state["scheduler"] = self.scheduler
+        # Mixed precision
+        self.scaler = GradScaler()
 
-    def state_dict(self):
-        return {"global_step": self.global_step}
-
-    def load_state_dict(self, state):
-        self.global_step = state.get("global_step", 0)
-
-    def compute_loss(self, outputs, labels):
-        B, T, V = outputs.size()
-        outputs = outputs.view(B * T, V)
-        labels = labels.view(B * T)
-        return self.criterion(outputs, labels)
-
-    def _rotate_snapshots(self):
-        if self.rank != 0:
-            return
-
-        all_step_dirs = sorted(
-            glob.glob(os.path.join(self.snapshot_dir, "step_*")),
-            key=os.path.getmtime,
-            reverse=True
+        # Set up OneCycleLR
+        self.scheduler = OneCycleLR(
+            self.optimizer,
+            max_lr=4e-4,       # changed from 1e-3 to 5e-4
+            total_steps=total_steps,
+            pct_start=0.01,
+            anneal_strategy='cos',
+            div_factor=25.0,
+            final_div_factor=1e4,
+            cycle_momentum=True,
+            base_momentum=0.85,
+            max_momentum=0.95,
+            three_phase=False,
         )
 
-        for old_dir in all_step_dirs[self.retention_limit:]:
-            tqdm.write(f"🧹 Removing old snapshot: {old_dir}")
-            shutil.rmtree(old_dir, ignore_errors=True)
+        self.logger.print(f"🟢 Training Starting on rank {rank}")
 
-    def _save_snapshot(self, step: int = None):
-        snapshot_path_latest = os.path.join(self.snapshot_dir, "latest")
-        snapshot_path_rotated = os.path.join(self.snapshot_dir, f"step_{step}") if step is not None else None
+    def save_model(self, path="model/a100model2.pt"):
+        # Save only model weights for inference, overwrite each time
+        if isinstance(self.model, DDP):
+            torch.save(self.model.module.state_dict(), path)
+        else:
+            torch.save(self.model.state_dict(), path)
+        if self.logger.is_main:
+            self.logger.print(f"💾 Model saved to {path}")
 
-        if self.rank == 0 and os.path.exists(snapshot_path_latest):
-            shutil.rmtree(snapshot_path_latest)
 
-        if dist.is_initialized():
-            dist.barrier()
-
-        if self.pending_snapshot and not self.pending_snapshot.done():
-            if self.rank == 0:
-                tqdm.write("⏳ Waiting for previous async snapshot to finish...")
-            self.pending_snapshot.wait()
-
-        self.pending_snapshot = Snapshot.async_take(
-            path=snapshot_path_latest,
-            app_state=self.snapshot_app_state,
-            replicated=["model"]
-        )
-
-        if snapshot_path_rotated:
-            Snapshot.take(
-                path=snapshot_path_rotated,
-                app_state=self.snapshot_app_state,
-                replicated=["model"]
-            )
-
-        if self.rank == 0:
-            tqdm.write(f"📂 Async snapshot started at step {step if step else '[unknown]'}")
-            self._rotate_snapshots()
-
-    def _train_epoch(self, epoch):
+    def epoch(self, epoch: int):
         self.model.train()
-        self.running_loss = 0.0
-        self.total_batches = 0
 
-        progress_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}", leave=False) if self.rank == 0 else self.dataloader
-
-        for batch_idx, batch in enumerate(progress_bar):
-            inputs = batch["inputs"].to(self.device)
-            labels = batch["labels"].to(self.device)
-
-            self.optimizer.zero_grad()
-
-            with autocast(device_type=self.device.type):
+        for step, batch in enumerate(self.dataloader):
+            inputs = batch["inputs"].to(self.device, non_blocking=True)
+            labels = batch["labels"].to(self.device, non_blocking=True)
+            
+            if step % self.accumulation_steps == 0:
+                self.optimizer.zero_grad(set_to_none=True)
+            
+            with autocast('cuda'): 
                 outputs = self.model(inputs)
-                loss = self.compute_loss(outputs, labels)
+                
+                loss = self.loss_fn(
+                    outputs.view(-1, outputs.size(-1)),  # [B*T, V]
+                    labels.view(-1)                      # [B*T]
+            )
+                
+            lr = self.optimizer.param_groups[0]["lr"]
+            
+            if step % self.accumulation_steps == 0 and self.logger.is_main:
+                self.logger.print(f"📝 Epoch {epoch} Step {step} Loss: {loss.item():.4f} LR: {lr:.6f}")
+                self.logger.wb(
+                    "log",
+                    metrics={"train/loss": loss.item(), "train/lr": lr},
+                    step=self.global_step
+                )
+
+            loss = loss / self.accumulation_steps
 
             self.scaler.scale(loss).backward()
-            self.scaler.step(self.optimizer)
-            self.scaler.update()
-
-            loss_value = loss.item()
-            if self.scheduler:
-                self.scheduler.step(loss=loss_value)
-            self.running_loss += loss_value
-            self.total_batches += 1
-            avg_running_loss = self.running_loss / self.total_batches
-
-            if self.logger and self.global_step % 100 == 0:
-                self.logger.log_metrics({
-                    "lr": self.scheduler.get_last_lr()[0] if self.scheduler else 0.0
-                }, step=self.global_step)
-
-            if self.global_step % self.save_interval == 0:
-                self._save_snapshot(step=self.global_step)
-
-            if self.rank == 0:
-                progress_bar.set_description(f"Epoch {epoch} | Batch {batch_idx}")
-                progress_bar.set_postfix(loss=loss_value, avg=avg_running_loss)
+            
+            if (step + 1) % self.accumulation_steps == 0:
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+                self.scheduler.step()
 
             self.global_step += 1
-            if self.logger:
-                self.logger.log_metrics({
-                    "train_loss": loss_value,
-                    "avg_running_loss": avg_running_loss
-                }, step=self.global_step)
 
-        if self.rank == 0:
-            progress_bar.close()
-            tqdm.write(f"✅ Epoch {epoch} | Final Avg Running Loss: {avg_running_loss:.4f}")
+            if self.global_step % 1000 == 0 and self.logger.is_main:
+                self.save_model("model/a100model2.pt")
+                self.logger.print("Saving model!!!")
 
-        return avg_running_loss
+        # ✅ 🛠️ Final optimizer step for remaining gradients (AFTER loop)
+        remaining = len(self.dataloader) % self.accumulation_steps
+        if remaining != 0:
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+            self.scheduler.step()
 
-    def resume_latest_snapshot(self):
-        if not os.path.exists(self.snapshot_dir):
-            if self.rank == 0:
-                print("📂 No snapshot directory found.")
-            return False
 
-        latest_path = os.path.join(self.snapshot_dir, "latest")
-        if not os.path.exists(latest_path):
-            if self.rank == 0:
-                print("🚫 No snapshot found at 'latest'.")
-            return False
-
-        if self.rank == 0:
-            print(f"📆 Resuming from snapshot at {latest_path}")
-
-        Snapshot(path=latest_path).restore(app_state=self.snapshot_app_state)
-        self.model.train()
-        return True
-
-    def fit(self, num_epochs, resume_from_latest=True):
-        if resume_from_latest:
-            self.resume_latest_snapshot()
-
-        for epoch in range(1, num_epochs + 1):
-            train_loss = self._train_epoch(epoch)
-
-            if self.rank == 0:
-                # 💾 Save model checkpoint at end of epoch
-                model_path = os.path.join(self.snapshot_dir, f"epoch_{epoch}_model.pt")
-                torch.save(self.model.state_dict(), model_path)
-                tqdm.write(f"💾 Saved model checkpoint at {model_path}")
-                tqdm.write(f"📆 Epoch {epoch} completed")
-
-        if self.rank == 0:
-            tqdm.write(f"🌟 Finished training at epoch {num_epochs}")
-
-        if self.pending_snapshot and not self.pending_snapshot.done():
-            if self.rank == 0:
-                tqdm.write("🕓 Waiting for final async snapshot to complete...")
-            self.pending_snapshot.wait()
-
-        if self.logger:
-            self.logger.log_metrics({
-                "final_epoch": num_epochs,
-                "final_loss": train_loss
-            }, step=self.global_step)
-
-        return train_loss
-
+    def train(self, epochs: int):
+        for epoch in range(epochs):
+            self.epoch(epoch)
