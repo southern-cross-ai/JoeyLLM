@@ -1,4 +1,4 @@
-i# ===============================
+# ===============================
 # JoeyLLM Training Config
 # ===============================
 
@@ -6,13 +6,19 @@ defaults:
   - _self_
 
 # -------------------------------
-# General Config
+# WandB Config
 # -------------------------------
 
-project:
+wandb:
   name: JoeyLLM
   run_name: Sunday
-  wandb_mode: online  # "online", "offline", or "disabled"
+  wandb_mode: online # "online", "offline", or "disabled"
+
+
+process:
+  rank: ${env:RANK,0}
+  local_rank: ${env:LOCAL_RANK,0}
+  world_size: ${env:WORLD_SIZE,1}
 
 # -------------------------------
 # Dataset Config
