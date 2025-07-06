@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libnvidia-ml-dev \
     git-lfs \
+    sshfs \ 
     && rm -rf /var/lib/apt/lists/*  
 
 # Ensure 'python3' is recognised as 'python'
