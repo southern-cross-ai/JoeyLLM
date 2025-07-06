@@ -8,6 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y bash-completion && \
     curl -fsSL https://code-server.dev/install.sh | sh && \
+    curl -fsSL https://ollama.com/install.sh | sh && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add vscode user (no sudo)
