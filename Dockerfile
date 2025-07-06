@@ -23,11 +23,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libnvidia-ml-dev \
     git-lfs \
-    sshfs \ 
-    && rm -rf /var/lib/apt/lists/*  
+    sshfs \
+    && rm -rf /var/lib/apt/lists/*
 
 # Ensure 'python3' is recognised as 'python'
 RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+# Install UV (fast Python package manager)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add ~/.local/bin to PATH for UV if needed
+ENV PATH="${PATH}:/root/.local/bin"
 
 # Default command (for interactive HPC usage)
 CMD ["/bin/bash"]
