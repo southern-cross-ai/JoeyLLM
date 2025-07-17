@@ -52,6 +52,7 @@ def main(cfg: DictConfig):
     hf_dataset = load_from_disk(dataset_path)
     hf_dataset.set_format(type="torch", columns=["input_ids", "target_ids"])
 
+    # Data Sampler
     sampler = DistributedSampler(
         dataset=hf_dataset,
         num_replicas=world_size,
