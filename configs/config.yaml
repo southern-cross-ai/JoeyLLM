@@ -11,7 +11,7 @@ defaults:
 
 wandbconfig:
   project: JoeyLLM_Data
-  name: OneEpock
+  name: Low LR
   mode: online # "online", "offline", or "disabled"
 
 # -------------------------------
@@ -52,7 +52,6 @@ optimizerconfig:
 # -------------------------------
 
 trainconfig:
-  total_steps: 400000
-  epochs: 1
-
+  total_steps: 24235
+  epochs: 3
 
