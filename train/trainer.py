@@ -67,8 +67,8 @@ class Trainer:
         self.model.train()
 
         for step, batch in enumerate(self.dataloader):
-            inputs = batch["inputs"].to(self.device, non_blocking=True)
-            labels = batch["labels"].to(self.device, non_blocking=True)
+            inputs = batch["input_ids"].to(self.device, non_blocking=True)
+            labels = batch["target_ids"].to(self.device, non_blocking=True)
             
             if step % self.accumulation_steps == 0:
                 self.optimizer.zero_grad(set_to_none=True)
