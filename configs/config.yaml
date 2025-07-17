@@ -10,9 +10,9 @@ defaults:
 # -------------------------------
 
 wandbconfig:
-  project: JoeyLLM
-  name: Sunday
-  mode: disabled # "online", "offline", or "disabled"
+  project: JoeyLLM_Data
+  name: OneEpock
+  mode: online # "online", "offline", or "disabled"
 
 # -------------------------------
 # Dataset Config
@@ -53,6 +53,6 @@ optimizerconfig:
 
 trainconfig:
   total_steps: 400000
-  epochs: 5
+  epochs: 1
 
 
