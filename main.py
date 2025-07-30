@@ -1,10 +1,15 @@
 import os
 import torch
-import torch.multiprocessing as mp
 import torch.distributed as dist
 from torch.utils.data import DataLoader
 from datasets import load_from_disk 
 from torch.utils.data.distributed import DistributedSampler 
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP  
+from torch.distributed.fsdp.wrap import size_based_auto_wrap_policy
+from functools import partial
+
+
+
 
 import hydra
 from omegaconf import DictConfig
@@ -13,6 +18,10 @@ from utils.logger import Monitor
 from model.joeyllm import JoeyLLM
 from train.trainer import Trainer
 from configs.valid import Config
+
+
+
+
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(cfg: DictConfig):
@@ -61,7 +70,7 @@ def main(cfg: DictConfig):
     )
 
     # DataLoader   
-    r0.print("📦 Loading Dataset...") 
+    r0.print("📦 Loading DataLoader...") 
     dataloader = DataLoader(
         dataset=hf_dataset,
         batch_size=vcfg.dataconfig.batch_size,
@@ -81,8 +90,16 @@ def main(cfg: DictConfig):
         num_layers=vcfg.modelconfig.num_layers,
         num_heads=vcfg.modelconfig.num_heads,
         dropout=vcfg.modelconfig.dropout,
-        ).to(device)
+        )
 
+    auto_wrap_policy = partial(size_based_auto_wrap_policy, min_num_params=1000)
+
+    model = FSDP(
+        model,
+        auto_wrap_policy=auto_wrap_policy,
+        device_id=device,
+    )
+    
     # # Load Optimizer     
     r0.print("📈 Loading Optimizer")
     optimizer = torch.optim.AdamW(
@@ -103,13 +120,11 @@ def main(cfg: DictConfig):
         optimizer=optimizer,
         logger=r0,
         rank=rank,
-        world_size=world_size,
         total_steps=vcfg.trainconfig.total_steps,
         scheduler_cfg=vcfg.schedulerconfig,
         accumulation_steps=vcfg.trainconfig.accumulation_steps,
         save_model_path=vcfg.trainconfig.save_model_path,
         log_freq=vcfg.trainconfig.log_freq,
-        non_blocking=vcfg.trainconfig.non_blocking,
     )
 
     trainer.train(epochs=vcfg.trainconfig.epochs)

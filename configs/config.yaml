@@ -20,7 +20,7 @@ wandbconfig:
 
 dataconfig:
   data_path: data/008_00000.parquet
-  batch_size: 8 
+  batch_size: 16
   num_workers: 3
   shuffle: False     
   drop_last: True
@@ -58,7 +58,6 @@ trainconfig:
   accumulation_steps: 4
   save_model_path: data/a100model2.pt
   log_freq: 1000
-  non_blocking: true
 
 # -------------------------------
 # Scheduler Config

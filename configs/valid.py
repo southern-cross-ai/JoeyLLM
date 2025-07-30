@@ -36,7 +36,6 @@ class TrainConfig(BaseModel):
     accumulation_steps: int
     save_model_path: str
     log_freq: int
-    non_blocking: bool
 
 class SchedulerConfig(BaseModel):
     max_lr: float

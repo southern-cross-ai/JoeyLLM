@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import Module, CrossEntropyLoss
-from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP 
 from torch.optim.lr_scheduler import OneCycleLR
 from typing import Any
 from torch.amp import GradScaler, autocast
@@ -14,22 +14,18 @@ class Trainer:
         optimizer: torch.optim.Optimizer,
         logger: Any,
         rank: int,
-        world_size: int,
         total_steps: int,
         scheduler_cfg,
         accumulation_steps: int,
         save_model_path: str,
         log_freq: int,
-        non_blocking: bool,
         device: torch.device = None,
     ):
         self.rank = rank
-        self.world_size = world_size
         self.device = device or torch.device(f"cuda:{rank}")
         
-        # Move model to device, then wrap in DDP
-        self.model = model.to(self.device)
-        self.model = DDP(self.model, device_ids=[rank])
+        # Model is pre-wrapped with FSDP and already on the correct device
+        self.model = model
 
         self.optimizer = optimizer
         self.dataloader = dataloader
@@ -39,7 +35,6 @@ class Trainer:
         self.accumulation_steps = accumulation_steps
         self.save_model_path = save_model_path
         self.log_freq = log_freq
-        self.non_blocking = non_blocking
 
         # Mixed precision
         self.scaler = GradScaler()
@@ -63,13 +58,20 @@ class Trainer:
 
     def save_model(self, path=None):
         path = path or self.save_model_path
-        # Save only model weights for inference, overwrite each time
-        if isinstance(self.model, DDP):
-            torch.save(self.model.module.state_dict(), path)
-        else:
-            torch.save(self.model.state_dict(), path)
-        if self.logger.is_main:
-            self.logger.print(f"💾 Model saved to {path}")
+
+        try:
+            # Works for both FSDP and non-FSDP models
+            state_dict = self.model.state_dict()
+        except Exception as e:
+            self.logger.print(f"❌ Failed to get state_dict: {e}")
+            return
+
+        try:
+            torch.save(state_dict, path)
+            if self.logger.is_main:
+                self.logger.print(f"💾 Model saved to {path}")
+        except Exception as e:
+            self.logger.print(f"❌ Failed to save model: {e}")
 
 
     def epoch(self, epoch: int):
