@@ -48,7 +48,7 @@ def main(cfg: DictConfig):
 
     # Dataset
     r0.print("📦 Loading Dataset...")
-    dataset_path = "/home/projects/JoeyData/10BT/hugginface/011_00000.parquet"
+    dataset_path = "data/008_00000.parquet"
     hf_dataset = load_from_disk(dataset_path)
     hf_dataset.set_format(type="torch", columns=["input_ids", "target_ids"])
 

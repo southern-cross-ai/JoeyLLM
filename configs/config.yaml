@@ -12,7 +12,7 @@ defaults:
 wandbconfig:
   project: JoeyLLM_Data
   name: Low LR
-  mode: online # "online", "offline", or "disabled"
+  mode: offline # "online", "offline", or "disabled"
 
 # -------------------------------
 # Dataset Config
@@ -22,7 +22,7 @@ dataconfig:
   data_path: sample/10BT
   chunk_size: 512
   buffer_text_size: 8000
-  batch_size: 16
+  batch_size: 8 
   num_workers: 3
 
 # -------------------------------
@@ -32,9 +32,9 @@ dataconfig:
 modelconfig:
   vocab_size: 32000
   max_seq_len: 512
-  embed_dim: 768
-  num_layers: 24
-  num_heads: 16
+  embed_dim: 1280
+  num_layers: 36
+  num_heads: 20
   dropout: 0.1
 
 
