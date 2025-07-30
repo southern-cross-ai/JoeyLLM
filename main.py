@@ -52,6 +52,11 @@ def main(cfg: DictConfig):
         buffer_text_size=vcfg.dataconfig.buffer_text_size,
         batch_size=vcfg.dataconfig.batch_size,
         num_workers=vcfg.dataconfig.num_workers,
+        tokenizer_path=vcfg.dataconfig.tokenizer_path,
+        dataset_name=vcfg.dataconfig.dataset_name,
+        shuffle_min_buffer=vcfg.dataconfig.shuffle_min_buffer,
+        shuffle_buffer_multiplier=vcfg.dataconfig.shuffle_buffer_multiplier,
+        pin_memory=vcfg.dataconfig.pin_memory,
         world_size=world_size,
         rank=rank
     )
@@ -77,7 +82,7 @@ def main(cfg: DictConfig):
         )
 
     # Load model info into wandb 
-    r0.wb("model", model=model, log="gradients", log_freq=1000)
+    r0.wb("model", model=model, log="gradients", log_freq=vcfg.trainconfig.log_freq)
 
     # Load and start Traner Loop
     r0.print("🚀 Launching Trainer...")
@@ -89,6 +94,10 @@ def main(cfg: DictConfig):
         rank=rank,
         world_size=world_size,
         total_steps=vcfg.trainconfig.total_steps,
+        scheduler_cfg=vcfg.schedulerconfig,
+        accumulation_steps=vcfg.trainconfig.accumulation_steps,
+        save_model_path=vcfg.trainconfig.save_model_path,
+        log_freq=vcfg.trainconfig.log_freq,
     )
 
     trainer.train(epochs=vcfg.trainconfig.epochs)

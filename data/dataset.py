@@ -61,20 +61,26 @@ class BufferedStreamTokenChunkDataset(IterableDataset):
             token_buffer = token_buffer[self.chunk_size:]
 
 def get_dataloader(
-    data_path, 
-    chunk_size, 
-    buffer_text_size, 
-    batch_size, 
+    data_path,
+    chunk_size,
+    buffer_text_size,
+    batch_size,
     num_workers,
-    world_size: int = 1, rank: int = 0
+    tokenizer_path,
+    dataset_name,
+    shuffle_min_buffer,
+    shuffle_buffer_multiplier,
+    pin_memory,
+    world_size: int = 1,
+    rank: int = 0,
     ):
 
-    tokenizer = AutoTokenizer.from_pretrained("SouthernCrossAI/JoeyLLM_Tokenizer", use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, use_fast=True)
 
-    buffer_size = max(10_000, buffer_text_size * 5)
+    buffer_size = max(shuffle_min_buffer, buffer_text_size * shuffle_buffer_multiplier)
 
     dataset = load_dataset(
-        "HuggingFaceFW/fineweb",
+        dataset_name,
         data_dir=data_path,
         split="train",
         streaming=True
@@ -94,7 +100,7 @@ def get_dataloader(
         token_dataset,
         batch_size=batch_size,
         num_workers=num_workers,
-        pin_memory=True,
+        pin_memory=pin_memory,
     )
 
     return dataloader
