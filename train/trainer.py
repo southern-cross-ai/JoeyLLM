@@ -16,6 +16,10 @@ class Trainer:
         rank: int,
         world_size: int,
         total_steps: int,
+        scheduler_cfg,
+        accumulation_steps: int,
+        save_model_path: str,
+        log_freq: int,
         device: torch.device = None,
     ):
         self.rank = rank
@@ -31,7 +35,9 @@ class Trainer:
         self.logger = logger
         self.loss_fn = CrossEntropyLoss()
         self.global_step = 0
-        self.accumulation_steps = 4
+        self.accumulation_steps = accumulation_steps
+        self.save_model_path = save_model_path
+        self.log_freq = log_freq
 
         # Mixed precision
         self.scaler = GradScaler()
@@ -39,21 +45,22 @@ class Trainer:
         # Set up OneCycleLR
         self.scheduler = OneCycleLR(
             self.optimizer,
-            max_lr=4e-4,       # changed from 1e-3 to 5e-4
+            max_lr=scheduler_cfg.max_lr,
             total_steps=total_steps,
-            pct_start=0.01,
-            anneal_strategy='cos',
-            div_factor=25.0,
-            final_div_factor=1e4,
-            cycle_momentum=True,
-            base_momentum=0.85,
-            max_momentum=0.95,
-            three_phase=False,
+            pct_start=scheduler_cfg.pct_start,
+            anneal_strategy=scheduler_cfg.anneal_strategy,
+            div_factor=scheduler_cfg.div_factor,
+            final_div_factor=scheduler_cfg.final_div_factor,
+            cycle_momentum=scheduler_cfg.cycle_momentum,
+            base_momentum=scheduler_cfg.base_momentum,
+            max_momentum=scheduler_cfg.max_momentum,
+            three_phase=scheduler_cfg.three_phase,
         )
 
         self.logger.print(f"🟢 Training Starting on rank {rank}")
 
-    def save_model(self, path="model/a100model2.pt"):
+    def save_model(self, path=None):
+        path = path or self.save_model_path
         # Save only model weights for inference, overwrite each time
         if isinstance(self.model, DDP):
             torch.save(self.model.module.state_dict(), path)
@@ -102,8 +109,8 @@ class Trainer:
 
             self.global_step += 1
 
-            if self.global_step % 1000 == 0 and self.logger.is_main:
-                self.save_model("model/a100model2.pt")
+            if self.global_step % self.log_freq == 0 and self.logger.is_main:
+                self.save_model()
                 self.logger.print("Saving model!!!")
 
         # ✅ 🛠️ Final optimizer step for remaining gradients (AFTER loop)

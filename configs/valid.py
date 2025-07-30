@@ -14,6 +14,11 @@ class DataConfig(BaseModel):
     buffer_text_size: int
     batch_size: int
     num_workers: int
+    tokenizer_path: str
+    dataset_name: str
+    shuffle_min_buffer: int
+    shuffle_buffer_multiplier: int
+    pin_memory: bool
         
 
 class ModelConfig(BaseModel):
@@ -31,12 +36,27 @@ class OptimizerConfig(BaseModel):
 
 
 class TrainConfig(BaseModel):
-    total_steps: int 
+    total_steps: int
     epochs: int
+    accumulation_steps: int
+    save_model_path: str
+    log_freq: int
+
+class SchedulerConfig(BaseModel):
+    max_lr: float
+    pct_start: float
+    anneal_strategy: str
+    div_factor: float
+    final_div_factor: float
+    cycle_momentum: bool
+    base_momentum: float
+    max_momentum: float
+    three_phase: bool
 
 class Config(BaseModel):
     wandbconfig: WandBConfig
     dataconfig: DataConfig
     modelconfig: ModelConfig
     optimizerconfig: OptimizerConfig
+    schedulerconfig: SchedulerConfig
     trainconfig: TrainConfig

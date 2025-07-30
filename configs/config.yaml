@@ -24,6 +24,11 @@ dataconfig:
   buffer_text_size: 8000
   batch_size: 16
   num_workers: 3
+  tokenizer_path: SouthernCrossAI/JoeyLLM_Tokenizer
+  dataset_name: HuggingFaceFW/fineweb
+  shuffle_min_buffer: 10000
+  shuffle_buffer_multiplier: 5
+  pin_memory: true
 
 # -------------------------------
 # Model Config
@@ -48,11 +53,29 @@ optimizerconfig:
   weight_decay: 0.1
 
 # -------------------------------
+# Scheduler Config
+# -------------------------------
+
+schedulerconfig:
+  max_lr: 4e-4
+  pct_start: 0.01
+  anneal_strategy: cos
+  div_factor: 25.0
+  final_div_factor: 10000.0
+  cycle_momentum: true
+  base_momentum: 0.85
+  max_momentum: 0.95
+  three_phase: false
+
+# -------------------------------
 # Trainer Config
 # -------------------------------
 
 trainconfig:
   total_steps: 400000
   epochs: 5
+  accumulation_steps: 4
+  save_model_path: model/a100model2.pt
+  log_freq: 1000
 
 
