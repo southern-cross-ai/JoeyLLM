@@ -49,7 +49,7 @@ def main(cfg: DictConfig):
     # Dataset
     r0.print("📦 Loading Dataset...")
 
-    dataset_path = "data/008_00000.parquet"
+    dataset_path = vcfg.dataconfig.data_path
     hf_dataset = load_from_disk(dataset_path)
     hf_dataset.set_format(type="torch", columns=["input_ids", "target_ids"])
 
@@ -67,9 +67,9 @@ def main(cfg: DictConfig):
         batch_size=vcfg.dataconfig.batch_size,
         sampler=sampler,
         num_workers=vcfg.dataconfig.num_workers,
-        shuffle=False,     
-        drop_last=True,
-        pin_memory=True     
+        shuffle=vcfg.dataconfig.shuffle,     
+        drop_last=vcfg.dataconfig.drop_last,
+        pin_memory=vcfg.dataconfig.pin_memory
     )   
 
     # Load Model

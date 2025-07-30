@@ -19,18 +19,12 @@ wandbconfig:
 # -------------------------------
 
 dataconfig:
-  data_path: sample/10BT
-  chunk_size: 512
-  buffer_text_size: 8000
+  data_path: data/008_00000.parquet
   batch_size: 8 
   num_workers: 3
-  tokenizer_path: SouthernCrossAI/JoeyLLM_Tokenizer
-  dataset_name: HuggingFaceFW/fineweb
-  shuffle_min_buffer: 10000
-  shuffle_buffer_multiplier: 5
-  pin_memory: true
-  use_fast_tokenizer: true
-  streaming: true
+  shuffle: False     
+  drop_last: True
+  pin_memory: True  
 
 # -------------------------------
 # Model Config
@@ -55,6 +49,18 @@ optimizerconfig:
   weight_decay: 0.1
 
 # -------------------------------
+# Trainer Config
+# -------------------------------
+
+trainconfig:
+  total_steps: 24235
+  epochs: 3
+  accumulation_steps: 4
+  save_model_path: data/a100model2.pt
+  log_freq: 1000
+  non_blocking: true
+
+# -------------------------------
 # Scheduler Config
 # -------------------------------
 
@@ -69,15 +75,5 @@ schedulerconfig:
   max_momentum: 0.95
   three_phase: false
 
-# -------------------------------
-# Trainer Config
-# -------------------------------
 
-trainconfig:
-  total_steps: 24235
-  epochs: 3
-  accumulation_steps: 4
-  save_model_path: model/a100model2.pt
-  log_freq: 1000
-  non_blocking: true
 

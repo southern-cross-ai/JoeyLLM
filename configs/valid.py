@@ -9,17 +9,11 @@ class WandBConfig(BaseModel):
 
 class DataConfig(BaseModel):
     data_path: str
-    chunk_size: int
-    buffer_text_size: int
     batch_size: int
     num_workers: int
-    tokenizer_path: str
-    dataset_name: str
-    shuffle_min_buffer: int
-    shuffle_buffer_multiplier: int
-    pin_memory: bool
-    use_fast_tokenizer: bool
-    streaming: bool
+    shuffle: bool     
+    drop_last: bool
+    pin_memory: bool  
         
 
 class ModelConfig(BaseModel):
