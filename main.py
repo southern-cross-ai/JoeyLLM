@@ -57,6 +57,8 @@ def main(cfg: DictConfig):
         shuffle_min_buffer=vcfg.dataconfig.shuffle_min_buffer,
         shuffle_buffer_multiplier=vcfg.dataconfig.shuffle_buffer_multiplier,
         pin_memory=vcfg.dataconfig.pin_memory,
+        use_fast_tokenizer=vcfg.dataconfig.use_fast_tokenizer,
+        streaming=vcfg.dataconfig.streaming,
         world_size=world_size,
         rank=rank
     )
@@ -98,6 +100,7 @@ def main(cfg: DictConfig):
         accumulation_steps=vcfg.trainconfig.accumulation_steps,
         save_model_path=vcfg.trainconfig.save_model_path,
         log_freq=vcfg.trainconfig.log_freq,
+        non_blocking=vcfg.trainconfig.non_blocking,
     )
 
     trainer.train(epochs=vcfg.trainconfig.epochs)

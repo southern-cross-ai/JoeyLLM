@@ -20,6 +20,7 @@ class Trainer:
         accumulation_steps: int,
         save_model_path: str,
         log_freq: int,
+        non_blocking: bool,
         device: torch.device = None,
     ):
         self.rank = rank
@@ -38,6 +39,7 @@ class Trainer:
         self.accumulation_steps = accumulation_steps
         self.save_model_path = save_model_path
         self.log_freq = log_freq
+        self.non_blocking = non_blocking
 
         # Mixed precision
         self.scaler = GradScaler()
@@ -74,8 +76,8 @@ class Trainer:
         self.model.train()
 
         for step, batch in enumerate(self.dataloader):
-            inputs = batch["inputs"].to(self.device, non_blocking=True)
-            labels = batch["labels"].to(self.device, non_blocking=True)
+            inputs = batch["inputs"].to(self.device, non_blocking=self.non_blocking)
+            labels = batch["labels"].to(self.device, non_blocking=self.non_blocking)
             
             if step % self.accumulation_steps == 0:
                 self.optimizer.zero_grad(set_to_none=True)

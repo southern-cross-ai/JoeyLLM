@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Tuple
-from pydantic_settings import BaseSettings
+from typing import Tuple
 
 
 class WandBConfig(BaseModel):
@@ -19,6 +18,8 @@ class DataConfig(BaseModel):
     shuffle_min_buffer: int
     shuffle_buffer_multiplier: int
     pin_memory: bool
+    use_fast_tokenizer: bool
+    streaming: bool
         
 
 class ModelConfig(BaseModel):
@@ -41,6 +42,7 @@ class TrainConfig(BaseModel):
     accumulation_steps: int
     save_model_path: str
     log_freq: int
+    non_blocking: bool
 
 class SchedulerConfig(BaseModel):
     max_lr: float
@@ -60,3 +62,4 @@ class Config(BaseModel):
     optimizerconfig: OptimizerConfig
     schedulerconfig: SchedulerConfig
     trainconfig: TrainConfig
+

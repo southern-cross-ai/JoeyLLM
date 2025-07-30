@@ -71,11 +71,13 @@ def get_dataloader(
     shuffle_min_buffer,
     shuffle_buffer_multiplier,
     pin_memory,
+    use_fast_tokenizer,
+    streaming,
     world_size: int = 1,
     rank: int = 0,
     ):
 
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, use_fast=use_fast_tokenizer)
 
     buffer_size = max(shuffle_min_buffer, buffer_text_size * shuffle_buffer_multiplier)
 
@@ -83,7 +85,7 @@ def get_dataloader(
         dataset_name,
         data_dir=data_path,
         split="train",
-        streaming=True
+        streaming=streaming
     ).shuffle(buffer_size=buffer_size)
 
     if world_size > 1:

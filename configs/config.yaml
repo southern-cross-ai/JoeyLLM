@@ -29,6 +29,8 @@ dataconfig:
   shuffle_min_buffer: 10000
   shuffle_buffer_multiplier: 5
   pin_memory: true
+  use_fast_tokenizer: true
+  streaming: true
 
 # -------------------------------
 # Model Config
@@ -77,5 +79,6 @@ trainconfig:
   accumulation_steps: 4
   save_model_path: model/a100model2.pt
   log_freq: 1000
+  non_blocking: true
 
 
