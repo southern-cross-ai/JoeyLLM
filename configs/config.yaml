@@ -20,7 +20,7 @@ wandbconfig:
 
 dataconfig:
   data_path: data/008_00000.parquet
-  batch_size: 16
+  batch_size: 14
   num_workers: 3
   shuffle: False     
   drop_last: True
@@ -33,9 +33,9 @@ dataconfig:
 modelconfig:
   vocab_size: 32000
   max_seq_len: 512
-  embed_dim: 1280
-  num_layers: 36
-  num_heads: 20
+  embed_dim: 2048
+  num_layers: 24
+  num_heads: 16
   dropout: 0.1
 
 

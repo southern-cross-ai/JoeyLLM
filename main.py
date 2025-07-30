@@ -4,9 +4,14 @@ import torch.distributed as dist
 from torch.utils.data import DataLoader
 from datasets import load_from_disk 
 from torch.utils.data.distributed import DistributedSampler 
-from torch.distributed.fsdp import FullyShardedDataParallel as FSDP  
-from torch.distributed.fsdp.wrap import size_based_auto_wrap_policy
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, wrap
+from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from functools import partial
+from model.joeyllm import GPTBlock
+from torch.distributed.fsdp import MixedPrecision
+from torch import float16
+from torch import bfloat16
+
 
 
 
@@ -92,14 +97,29 @@ def main(cfg: DictConfig):
         dropout=vcfg.modelconfig.dropout,
         )
 
-    auto_wrap_policy = partial(size_based_auto_wrap_policy, min_num_params=1000)
+    mp_policy = MixedPrecision(
+        param_dtype=bfloat16,
+        reduce_dtype=bfloat16,
+        buffer_dtype=bfloat16
+    )
 
+
+    auto_wrap_policy = partial(
+        transformer_auto_wrap_policy,
+        transformer_layer_cls={GPTBlock}
+    )
+
+    # model = model.to(device)
+    # model = FSDP(model, auto_wrap_policy=auto_wrap_policy)
+    
     model = FSDP(
         model,
         auto_wrap_policy=auto_wrap_policy,
-        device_id=device,
+        mixed_precision=mp_policy,
+        device_id=device
     )
-    
+
+
     # # Load Optimizer     
     r0.print("📈 Loading Optimizer")
     optimizer = torch.optim.AdamW(
