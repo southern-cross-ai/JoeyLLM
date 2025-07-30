@@ -10,9 +10,9 @@ defaults:
 # -------------------------------
 
 wandbconfig:
-  project: JoeyLLM
-  name: Sunday
-  mode: disabled # "online", "offline", or "disabled"
+  project: JoeyLLM_Data
+  name: Low LR
+  mode: offline # "online", "offline", or "disabled"
 
 # -------------------------------
 # Dataset Config
@@ -22,7 +22,7 @@ dataconfig:
   data_path: sample/10BT
   chunk_size: 512
   buffer_text_size: 8000
-  batch_size: 16
+  batch_size: 8 
   num_workers: 3
   tokenizer_path: SouthernCrossAI/JoeyLLM_Tokenizer
   dataset_name: HuggingFaceFW/fineweb
@@ -39,9 +39,9 @@ dataconfig:
 modelconfig:
   vocab_size: 32000
   max_seq_len: 512
-  embed_dim: 768
-  num_layers: 24
-  num_heads: 16
+  embed_dim: 1280
+  num_layers: 36
+  num_heads: 20
   dropout: 0.1
 
 
@@ -74,11 +74,10 @@ schedulerconfig:
 # -------------------------------
 
 trainconfig:
-  total_steps: 400000
-  epochs: 5
+  total_steps: 24235
+  epochs: 3
   accumulation_steps: 4
   save_model_path: model/a100model2.pt
   log_freq: 1000
   non_blocking: true
-
 

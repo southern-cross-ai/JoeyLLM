@@ -2,13 +2,15 @@ import os
 import torch
 import torch.multiprocessing as mp
 import torch.distributed as dist
+from torch.utils.data import DataLoader
+from datasets import load_from_disk 
+from torch.utils.data.distributed import DistributedSampler 
 
 import hydra
 from omegaconf import DictConfig
 
 from utils.logger import Monitor
 from model.joeyllm import JoeyLLM
-from data.dataset import get_dataloader
 from train.trainer import Trainer
 from configs.valid import Config
 
@@ -44,25 +46,32 @@ def main(cfg: DictConfig):
     # Todo add configs 
     r0.print("✅ Configs Loaded...")
 
-    # Load Dataset and Loader
+    # Dataset
     r0.print("📦 Loading Dataset...")
-    dataloader = get_dataloader(
-        data_path=vcfg.dataconfig.data_path,
-        chunk_size=vcfg.dataconfig.chunk_size,
-        buffer_text_size=vcfg.dataconfig.buffer_text_size,
-        batch_size=vcfg.dataconfig.batch_size,
-        num_workers=vcfg.dataconfig.num_workers,
-        tokenizer_path=vcfg.dataconfig.tokenizer_path,
-        dataset_name=vcfg.dataconfig.dataset_name,
-        shuffle_min_buffer=vcfg.dataconfig.shuffle_min_buffer,
-        shuffle_buffer_multiplier=vcfg.dataconfig.shuffle_buffer_multiplier,
-        pin_memory=vcfg.dataconfig.pin_memory,
-        use_fast_tokenizer=vcfg.dataconfig.use_fast_tokenizer,
-        streaming=vcfg.dataconfig.streaming,
-        world_size=world_size,
-        rank=rank
+
+    dataset_path = "data/008_00000.parquet"
+    hf_dataset = load_from_disk(dataset_path)
+    hf_dataset.set_format(type="torch", columns=["input_ids", "target_ids"])
+
+    # Data Sampler
+    sampler = DistributedSampler(
+        dataset=hf_dataset,
+        num_replicas=world_size,
+        rank=rank,
     )
-        
+
+    # DataLoader   
+    r0.print("📦 Loading Dataset...") 
+    dataloader = DataLoader(
+        dataset=hf_dataset,
+        batch_size=vcfg.dataconfig.batch_size,
+        sampler=sampler,
+        num_workers=vcfg.dataconfig.num_workers,
+        shuffle=False,     
+        drop_last=True,
+        pin_memory=True     
+    )   
+
     # Load Model
     r0.print("🧠 Initializing Model...")
     model = JoeyLLM(
